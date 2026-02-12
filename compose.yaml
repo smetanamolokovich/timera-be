@@ -1,0 +1,36 @@
+services:
+  server:
+    build:
+      context: .
+    environment:
+      NODE_ENV: development
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: timera-db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - 7878:7878
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres
+    restart: always
+    user: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=timera-db
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    expose:
+      - 5432
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db-data:
+
