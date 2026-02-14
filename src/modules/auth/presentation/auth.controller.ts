@@ -1,14 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { LoginUserUseCase } from '../application/login-user.usecase';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -19,10 +14,11 @@ export class AuthController {
     return this.loginUserUseCase.execute(dto.email, dto.password);
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
-  getProfile(@Request() req) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-    return req.user;
+  getProfile(@CurrentUser() user) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return user;
   }
 }

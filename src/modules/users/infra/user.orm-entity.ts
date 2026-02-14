@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { ProjectOrmEntity } from '../../projects/infra/project.orm-entity';
 
 @Entity('users')
 export class UserOrmEntity {
@@ -13,4 +14,7 @@ export class UserOrmEntity {
 
   @Column()
   createdAt!: Date;
+
+  @OneToMany(() => ProjectOrmEntity, (project) => project.user)
+  projects!: ProjectOrmEntity[];
 }

@@ -15,5 +15,6 @@ import { UsersController } from './presentation/users.controller';
       useClass: UserRepositoryImpl,
     },
   ],
+  exports: ['UserRepository'],
 })
 export class UsersModule {}
