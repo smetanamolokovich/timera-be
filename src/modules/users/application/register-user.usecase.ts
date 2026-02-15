@@ -1,32 +1,31 @@
 import { randomUUID } from 'crypto';
 import type { UserRepository } from '../domain/user.repository';
 import { User } from '../domain/user';
-import bcrypt from 'bcrypt';
 import { Inject } from '@nestjs/common';
+import { EmailAlreadyExistsError } from '../domain/errors/email-already-exists.error';
+import { InvalidPasswordError } from '../domain/errors/invalid-password.error';
+import type { PasswordHasher } from '../domain/password-hasher';
 
 export class RegisterUserUseCase {
   constructor(
     @Inject('UserRepository')
     private userRepository: UserRepository,
+    @Inject('PasswordHasher')
+    private passwordHasher: PasswordHasher,
   ) {}
 
   async execute(email: string, password: string): Promise<User> {
     const existingUser = await this.userRepository.findByEmail(email);
 
     if (existingUser) {
-      throw new Error('Email is already in use');
+      throw new EmailAlreadyExistsError();
     }
 
     if (!password || password.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
+      throw new InvalidPasswordError();
     }
 
-    const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
-    if (isNaN(saltRounds)) {
-      throw new Error('Invalid BCRYPT_SALT_ROUNDS configuration');
-    }
-
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const passwordHash = await this.passwordHasher.hash(password);
 
     const user = new User(randomUUID(), email, passwordHash, new Date());
 

@@ -24,4 +24,8 @@ export class ProjectMapper {
       createdAt: entity.createdAt,
     };
   }
+
+  static toResponseList(entities: Project[]): ProjectResponseDto[] {
+    return entities.map((entity) => this.toResponse(entity));
+  }
 }

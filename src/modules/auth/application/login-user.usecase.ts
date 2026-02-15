@@ -1,12 +1,15 @@
 import { Inject } from '@nestjs/common';
 import type { UserRepository } from '../../users/domain/user.repository';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcrypt';
+import { InvalidEmailOrPasswordError } from '../domain/errors/invalid-email-or-password.error';
+import type { PasswordHasher } from '../../users/domain/password-hasher';
 
 export class LoginUserUseCase {
   constructor(
     @Inject('UserRepository')
     private userRepository: UserRepository,
+    @Inject('PasswordHasher')
+    private passwordHasher: PasswordHasher,
     private jwtService: JwtService,
   ) {}
 
@@ -14,13 +17,16 @@ export class LoginUserUseCase {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new InvalidEmailOrPasswordError();
     }
 
-    const isMatch = await bcrypt.compare(password, user.getPasswordHash());
+    const isMatch = await this.passwordHasher.compare(
+      password,
+      user.getPasswordHash(),
+    );
 
     if (!isMatch) {
-      throw new Error('Invalid email or password');
+      throw new InvalidEmailOrPasswordError();
     }
 
     const payload = { sub: user.id, email: user.email };
