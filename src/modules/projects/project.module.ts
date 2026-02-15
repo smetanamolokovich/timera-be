@@ -17,6 +17,5 @@ import { GetProjectByUserIdUseCase } from './application/get-project-by-user-id.
       useClass: ProjectRepositoryImpl,
     },
   ],
-  exports: ['ProjectRepository'],
 })
 export class ProjectModule {}

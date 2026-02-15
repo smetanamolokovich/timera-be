@@ -1,0 +1,28 @@
+import { Inject } from '@nestjs/common';
+import type { EmployeeRepository } from '../domain/employee.repository';
+import { randomUUID } from 'crypto';
+import { Employee } from '../domain/employee';
+
+export class CreateEmployeeUseCase {
+  constructor(
+    @Inject('EmployeeRepository')
+    private readonly employeeRepository: EmployeeRepository,
+  ) {}
+
+  async execute(
+    ownerUserId: string,
+    name: string,
+    hourlyRate?: number,
+  ): Promise<Employee> {
+    const employee = new Employee(
+      randomUUID(),
+      ownerUserId,
+      name,
+      hourlyRate ?? null,
+      new Date(),
+    );
+    await this.employeeRepository.save(employee);
+
+    return employee;
+  }
+}

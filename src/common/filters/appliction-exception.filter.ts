@@ -14,6 +14,8 @@ export class ApplicationExceptionFilter implements ExceptionFilter {
       });
     }
 
+    console.error('Unhandled exception:', exception);
+
     return response.status(500).json({
       statusCode: 500,
       message: 'Internal server error',
