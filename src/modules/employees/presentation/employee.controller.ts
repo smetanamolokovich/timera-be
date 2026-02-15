@@ -37,7 +37,6 @@ export class EmployeeController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(@CurrentUser() { id }: JwtUser, @Body() dto: CreateEmployeeDto) {
-    console.log('Creating employee for user ID:', id);
     return await this.createEmployeeUseCase.execute(
       id,
       dto.name,
