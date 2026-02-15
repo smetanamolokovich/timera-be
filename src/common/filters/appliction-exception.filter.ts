@@ -17,7 +17,13 @@ export class ApplicationExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const errorResponse = exception.getResponse();
 
-      return response.status(status).json(errorResponse);
+      return response
+        .status(status)
+        .json(
+          typeof errorResponse === 'string'
+            ? { statusCode: status, message: errorResponse }
+            : { statusCode: status, ...errorResponse },
+        );
     }
 
     // ApplicationError
