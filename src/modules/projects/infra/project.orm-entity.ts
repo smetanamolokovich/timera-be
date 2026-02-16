@@ -3,9 +3,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserOrmEntity } from '../../users/infra/user.orm-entity';
+import { OrganizationOrmEntity } from '../../organizations/infra/organization.orm-entity';
+import { TimeEntryOrmEntity } from '../../time-entries/infra/time-entry.orm-entiry';
+import { WorkTypeOrmEntity } from '../../work-types/infra/work-type.orm-entity';
 
 @Entity('projects')
 export class ProjectOrmEntity {
@@ -13,13 +16,17 @@ export class ProjectOrmEntity {
   id!: string;
 
   @Column()
-  userId!: string;
+  organizationId!: string;
 
-  @ManyToOne(() => UserOrmEntity, (user) => user.projects, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'userId' })
-  user!: UserOrmEntity;
+  @ManyToOne(
+    () => OrganizationOrmEntity,
+    (organization) => organization.projects,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'organizationId' })
+  organization!: OrganizationOrmEntity;
 
   @Column({
     type: 'varchar',
@@ -29,4 +36,10 @@ export class ProjectOrmEntity {
 
   @Column()
   createdAt!: Date;
+
+  @OneToMany(() => TimeEntryOrmEntity, (timeEntry) => timeEntry.project)
+  timeEntries!: TimeEntryOrmEntity[];
+
+  @OneToMany(() => WorkTypeOrmEntity, (workType) => workType.project)
+  workTypes!: WorkTypeOrmEntity[];
 }

@@ -23,10 +23,4 @@ export class ProjectRepositoryImpl implements ProjectRepository {
 
     return ProjectMapper.toDomain(row);
   }
-
-  async findByUserId(userId: string): Promise<Project[]> {
-    const rows = await this.projectRepository.find({ where: { userId } });
-
-    return rows.map((row) => ProjectMapper.toDomain(row));
-  }
 }

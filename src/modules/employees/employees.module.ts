@@ -15,5 +15,6 @@ import { EmployeeController } from './presentation/employee.controller';
     },
   ],
   controllers: [EmployeeController],
+  exports: ['EmployeeRepository'],
 })
 export class EmployeesModule {}

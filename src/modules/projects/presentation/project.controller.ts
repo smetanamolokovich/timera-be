@@ -1,6 +1,5 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { CreateProjectUseCase } from '../application/create-project.usecase';
-import { GetProjectByUserIdUseCase } from '../application/get-project-by-user-id.usecase';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -18,10 +17,7 @@ import {
 
 @Controller('projects')
 export class ProjectController {
-  constructor(
-    private readonly createProjectUseCase: CreateProjectUseCase,
-    private readonly getProjectByUserIdUseCase: GetProjectByUserIdUseCase,
-  ) {}
+  constructor(private readonly createProjectUseCase: CreateProjectUseCase) {}
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new project' })
@@ -45,23 +41,5 @@ export class ProjectController {
     @Body() dto: CreateProjectDto,
   ) {
     return this.createProjectUseCase.execute(user.id, dto.name);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Get projects by user ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'The projects have been successfully retrieved.',
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized. Please provide a valid JWT token.',
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'An unexpected error occurred.',
-  })
-  @Get()
-  async getProjectsByUserId(@CurrentUser() user: JwtUser) {
-    return this.getProjectByUserIdUseCase.execute(user.id);
   }
 }
