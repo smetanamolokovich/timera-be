@@ -41,16 +41,14 @@ export class CreateTimeEntryUseCase {
       throw new AccessDeniedError();
     }
 
-    const workType = await this.workTypeRepository.findById(workTypeId);
+    const workType = await this.workTypeRepository.findByIdAndProjectId(
+      workTypeId,
+      project.id,
+    );
+
     if (!workType) {
       throw new AccessDeniedError();
     }
-
-    if (workType.projectId !== project.id) {
-      throw new AccessDeniedError();
-    }
-
-    // TODO: can be workTypeRepository.findByIdAndProjectId(workTypeId, projectId)
 
     const timeEntry = new TimeEntry(
       randomUUID(),

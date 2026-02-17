@@ -24,4 +24,15 @@ export class WorkTypeRepositoryImpl implements WorkTypeRepository {
 
     return WorkTypeMapper.toDomain(row);
   }
+
+  async findByIdAndProjectId(
+    id: string,
+    projectId: string,
+  ): Promise<WorkType | null> {
+    const row = await this.repository.findOne({ where: { id, projectId } });
+
+    if (!row) return null;
+
+    return WorkTypeMapper.toDomain(row);
+  }
 }
