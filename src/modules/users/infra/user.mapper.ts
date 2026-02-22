@@ -1,5 +1,4 @@
 import { User } from '../domain/user';
-import { UserResponseDto } from '../presentation/dto/user-response.dto';
 import { UserOrmEntity } from './user.orm-entity';
 
 export class UserMapper {
@@ -20,13 +19,5 @@ export class UserMapper {
     orm.createdAt = user.createdAt;
 
     return orm;
-  }
-
-  static toResponse(user: User): UserResponseDto {
-    return {
-      id: user.id,
-      email: user.email,
-      createdAt: user.createdAt,
-    };
   }
 }

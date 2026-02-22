@@ -14,6 +14,7 @@ import {
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ProjectPresentationMapper } from './project.mapper';
 
 @Controller('projects')
 export class ProjectController {
@@ -40,6 +41,8 @@ export class ProjectController {
     @CurrentUser() user: JwtUser,
     @Body() dto: CreateProjectDto,
   ) {
-    return this.createProjectUseCase.execute(user.id, dto.name);
+    const project = await this.createProjectUseCase.execute(user.id, dto.name);
+
+    return ProjectPresentationMapper.toResponse(project);
   }
 }

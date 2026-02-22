@@ -6,16 +6,17 @@ import type { WorkTypeRepository } from '../../work-types/domain/work-type.repos
 import { randomUUID } from 'crypto';
 import { TimeEntry } from '../domain/time-entry';
 import { AccessDeniedError } from '../../../common/errors/access-denied.error';
+import { REPOSITORY_TOKENS } from '../../../common/tokens';
 
 export class CreateTimeEntryUseCase {
   constructor(
-    @Inject('TimeEntryRepository')
+    @Inject(REPOSITORY_TOKENS.TimeEntryRepository)
     private readonly timeEntryRepository: TimeEntryRepository,
-    @Inject('EmployeeRepository')
+    @Inject(REPOSITORY_TOKENS.EmployeeRepository)
     private readonly employeeRepository: EmployeeRepository,
-    @Inject('ProjectRepository')
+    @Inject(REPOSITORY_TOKENS.ProjectRepository)
     private readonly projectRepository: ProjectRepository,
-    @Inject('WorkTypeRepository')
+    @Inject(REPOSITORY_TOKENS.WorkTypeRepository)
     private readonly workTypeRepository: WorkTypeRepository,
   ) {}
 

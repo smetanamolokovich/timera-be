@@ -1,5 +1,4 @@
 import { TimeEntry } from '../domain/time-entry';
-import { TimeEntryResponseDto } from '../presentation/dto/time-entry-response.dto';
 import { TimeEntryOrmEntity } from './time-entry.orm-entiry';
 
 export class TimeEntryMapper {
@@ -28,22 +27,5 @@ export class TimeEntryMapper {
     orm.createdAt = entity.createdAt;
 
     return orm;
-  }
-
-  static toResponse(entity: TimeEntry): TimeEntryResponseDto {
-    return {
-      id: entity.id,
-      projectId: entity.projectId,
-      employeeId: entity.employeeId,
-      workTypeId: entity.workTypeId,
-      description: entity.description,
-      hours: entity.hours,
-      date: entity.date,
-      createdAt: entity.createdAt,
-    };
-  }
-
-  static toResponseList(entities: TimeEntry[]): TimeEntryResponseDto[] {
-    return entities.map((entity) => this.toResponse(entity));
   }
 }

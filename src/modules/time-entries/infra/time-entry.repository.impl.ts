@@ -1,5 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { TimeEntryRepository } from '../domain/time-entry.repository';
+import {
+  SummaryParams,
+  TimeEntryRepository,
+} from '../domain/time-entry.repository';
 import { TimeEntryOrmEntity } from './time-entry.orm-entiry';
 import { Repository } from 'typeorm/repository/Repository.js';
 import { TimeEntry } from '../domain/time-entry';
@@ -65,76 +68,18 @@ export class TimeEntryRepositoryImpl implements TimeEntryRepository {
     return rows.map((row) => TimeEntryMapper.toDomain(row));
   }
 
-  async getProjectSummary(
-    projectId: string,
-    fromDate?: Date,
-    toDate?: Date,
-  ): Promise<ProjectSummary> {
-    const totalsQb = this.repository
-      .createQueryBuilder('timeEntry')
-      .leftJoin('timeEntry.employee', 'employee')
-      .select('COALESCE(SUM(timeEntry.hours), 0)', 'totalHours')
-      .addSelect(
-        'COALESCE(SUM(timeEntry.hours * COALESCE(employee.hourlyRate, 0)), 0)',
-        'totalCost',
-      )
-      .where('timeEntry.projectId = :projectId', { projectId });
+  async getProjectSummary(params: SummaryParams): Promise<ProjectSummary> {
+    const { totalHours, totalCost } = await this.getTotalHours(params);
 
-    this.applyDateFilter(totalsQb, fromDate, toDate);
+    const byEmployee = await this.getByEmployeeSummary(params);
 
-    const totals = await totalsQb.getRawOne<{
-      totalHours: string;
-      totalCost: string;
-    }>();
-
-    const byEmployeeQb = this.repository
-      .createQueryBuilder('timeEntry')
-      .leftJoin('timeEntry.employee', 'employee')
-      .select('timeEntry.employeeId', 'employeeId')
-      .addSelect('COALESCE(SUM(timeEntry.hours), 0)', 'hours')
-      .addSelect(
-        'COALESCE(SUM(timeEntry.hours * COALESCE(employee.hourlyRate, 0)), 0)',
-        'cost',
-      )
-      .orderBy('hours', 'DESC')
-      .groupBy('timeEntry.employeeId')
-      .where('timeEntry.projectId = :projectId', { projectId });
-
-    this.applyDateFilter(byEmployeeQb, fromDate, toDate);
-
-    const byEmployee = await byEmployeeQb.getRawMany<{
-      employeeId: string;
-      hours: string;
-      cost: string;
-    }>();
-
-    const byWorkTypeQb = this.repository
-      .createQueryBuilder('timeEntry')
-      .select('timeEntry.workTypeId', 'workTypeId')
-      .addSelect('COALESCE(SUM(timeEntry.hours), 0)', 'hours')
-      .groupBy('timeEntry.workTypeId')
-      .orderBy('hours', 'DESC')
-      .where('timeEntry.projectId = :projectId', { projectId });
-
-    this.applyDateFilter(byWorkTypeQb, fromDate, toDate);
-
-    const byWorkType = await byWorkTypeQb.getRawMany<{
-      workTypeId: string;
-      hours: string;
-    }>();
+    const byWorkType = await this.getByWorkTypeSummary(params);
 
     return {
-      totalHours: Number(totals?.totalHours || 0),
-      totalCost: parseFloat(totals?.totalCost || '0'),
-      byEmployee: byEmployee.map((row) => ({
-        employeeId: row.employeeId,
-        hours: parseFloat(row.hours),
-        cost: parseFloat(row.cost),
-      })),
-      byWorkType: byWorkType.map((row) => ({
-        workTypeId: row.workTypeId,
-        hours: parseFloat(row.hours),
-      })),
+      totalHours,
+      totalCost,
+      byEmployee,
+      byWorkType,
     };
   }
 
@@ -149,5 +94,83 @@ export class TimeEntryRepositoryImpl implements TimeEntryRepository {
     if (toDate) {
       qb.andWhere('timeEntry.date <= :toDate', { toDate });
     }
+  }
+
+  private async getTotalHours(params: SummaryParams) {
+    const { projectId, fromDate, toDate } = params;
+    const qb = this.repository
+      .createQueryBuilder('timeEntry')
+      .leftJoin('timeEntry.employee', 'employee')
+      .select('COALESCE(SUM(timeEntry.hours), 0)', 'totalHours')
+      .addSelect(
+        'COALESCE(SUM(timeEntry.hours * COALESCE(employee.hourlyRate, 0)), 0)',
+        'totalCost',
+      )
+      .where('timeEntry.projectId = :projectId', { projectId });
+
+    this.applyDateFilter(qb, fromDate, toDate);
+
+    const result = await qb.getRawOne<{
+      totalHours: string;
+      totalCost: string;
+    }>();
+
+    return {
+      totalHours: Number(result?.totalHours || 0),
+      totalCost: parseFloat(result?.totalCost || '0'),
+    };
+  }
+
+  private async getByEmployeeSummary(params: SummaryParams) {
+    const { projectId, fromDate, toDate } = params;
+    const qb = this.repository
+      .createQueryBuilder('timeEntry')
+      .leftJoin('timeEntry.employee', 'employee')
+      .select('timeEntry.employeeId', 'employeeId')
+      .addSelect('COALESCE(SUM(timeEntry.hours), 0)', 'hours')
+      .addSelect(
+        'COALESCE(SUM(timeEntry.hours * COALESCE(employee.hourlyRate, 0)), 0)',
+        'cost',
+      )
+      .orderBy('hours', 'DESC')
+      .groupBy('timeEntry.employeeId')
+      .where('timeEntry.projectId = :projectId', { projectId });
+
+    this.applyDateFilter(qb, fromDate, toDate);
+
+    const result = await qb.getRawMany<{
+      employeeId: string;
+      hours: string;
+      cost: string;
+    }>();
+
+    return result.map((row) => ({
+      employeeId: row.employeeId,
+      hours: parseFloat(row.hours),
+      cost: parseFloat(row.cost),
+    }));
+  }
+
+  private async getByWorkTypeSummary(params: SummaryParams) {
+    const { projectId, fromDate, toDate } = params;
+    const qb = this.repository
+      .createQueryBuilder('timeEntry')
+      .select('timeEntry.workTypeId', 'workTypeId')
+      .addSelect('COALESCE(SUM(timeEntry.hours), 0)', 'hours')
+      .groupBy('timeEntry.workTypeId')
+      .orderBy('hours', 'DESC')
+      .where('timeEntry.projectId = :projectId', { projectId });
+
+    this.applyDateFilter(qb, fromDate, toDate);
+
+    const result = await qb.getRawMany<{
+      workTypeId: string;
+      hours: string;
+    }>();
+
+    return result.map((row) => ({
+      workTypeId: row.workTypeId,
+      hours: parseFloat(row.hours),
+    }));
   }
 }

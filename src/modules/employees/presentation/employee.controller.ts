@@ -13,6 +13,7 @@ import {
 } from '../../../common/decorators/current-user.decorator';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { CreateEmployeeUseCase } from '../application/create-employee.usecase';
+import { EmployeePresentationMapper } from './employee.mapper';
 
 @Controller('employees')
 export class EmployeeController {
@@ -37,10 +38,12 @@ export class EmployeeController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(@CurrentUser() { id }: JwtUser, @Body() dto: CreateEmployeeDto) {
-    return await this.createEmployeeUseCase.execute(
+    const employee = await this.createEmployeeUseCase.execute(
       id,
       dto.name,
       dto.hourlyRate,
     );
+
+    return EmployeePresentationMapper.toResponse(employee);
   }
 }

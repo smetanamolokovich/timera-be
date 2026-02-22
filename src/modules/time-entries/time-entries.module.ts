@@ -6,6 +6,8 @@ import { TimeEntryOrmEntity } from './infra/time-entry.orm-entiry';
 import { TimeEntryRepositoryImpl } from './infra/time-entry.repository.impl';
 import { CreateTimeEntryUseCase } from './application/create-time-entry.usecase';
 import { WorkTypesModule } from '../work-types/work-types.module';
+import { GetProjectSummaryUseCase } from './application/get-project-summary.usecase';
+import { REPOSITORY_TOKENS } from '../../common/tokens';
 
 @Module({
   imports: [
@@ -17,10 +19,12 @@ import { WorkTypesModule } from '../work-types/work-types.module';
   controllers: [],
   providers: [
     CreateTimeEntryUseCase,
+    GetProjectSummaryUseCase,
     {
-      provide: 'TimeEntryRepository',
+      provide: REPOSITORY_TOKENS.TimeEntryRepository,
       useClass: TimeEntryRepositoryImpl,
     },
   ],
+  exports: [REPOSITORY_TOKENS.TimeEntryRepository, GetProjectSummaryUseCase],
 })
 export class TimeEntriesModule {}

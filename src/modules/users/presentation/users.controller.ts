@@ -1,13 +1,13 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { RegisterUserUseCase } from '../application/register-user.usecase';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { UserMapper } from '../infra/user.mapper';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { UserPresentationMapper } from './user.mapper';
 
 @Controller('users')
 export class UsersController {
@@ -31,6 +31,6 @@ export class UsersController {
       dto.password,
     );
 
-    return UserMapper.toResponse(user);
+    return UserPresentationMapper.toResponse(user);
   }
 }

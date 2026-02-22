@@ -5,12 +5,13 @@ import { Inject } from '@nestjs/common';
 import { EmailAlreadyExistsError } from '../domain/errors/email-already-exists.error';
 import { InvalidPasswordError } from '../domain/errors/invalid-password.error';
 import type { PasswordHasher } from '../domain/password-hasher';
+import { REPOSITORY_TOKENS, SERVICE_TOKENS } from '../../../common/tokens';
 
 export class RegisterUserUseCase {
   constructor(
-    @Inject('UserRepository')
+    @Inject(REPOSITORY_TOKENS.UserRepository)
     private userRepository: UserRepository,
-    @Inject('PasswordHasher')
+    @Inject(SERVICE_TOKENS.PasswordHasher)
     private passwordHasher: PasswordHasher,
   ) {}
 

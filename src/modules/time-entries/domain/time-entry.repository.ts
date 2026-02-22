@@ -1,6 +1,11 @@
 import { ProjectSummary } from './read-models/project-summary';
 import type { TimeEntry } from './time-entry';
 
+export interface SummaryParams {
+  projectId: string;
+  fromDate?: Date;
+  toDate?: Date;
+}
 export interface TimeEntryRepository {
   save(timeEntry: TimeEntry): Promise<void>;
   findById(id: string): Promise<TimeEntry | null>;
@@ -11,9 +16,5 @@ export interface TimeEntryRepository {
     toDate?: Date,
   ): Promise<TimeEntry[]>;
   findByWorkTypeId(workTypeId: string): Promise<TimeEntry[]>;
-  getProjectSummary(
-    projectId: string,
-    fromDate?: Date,
-    toDate?: Date,
-  ): Promise<ProjectSummary>;
+  getProjectSummary(params: SummaryParams): Promise<ProjectSummary>;
 }

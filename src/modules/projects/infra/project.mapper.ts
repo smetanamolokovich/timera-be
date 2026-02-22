@@ -1,5 +1,4 @@
 import { Project } from '../domain/project';
-import { ProjectResponseDto } from '../presentation/dto/project-response.dto';
 import { ProjectOrmEntity } from './project.orm-entity';
 
 export class ProjectMapper {
@@ -15,17 +14,5 @@ export class ProjectMapper {
     orm.createdAt = entity.createdAt;
 
     return orm;
-  }
-
-  static toResponse(entity: Project): ProjectResponseDto {
-    return {
-      id: entity.id,
-      name: entity.name,
-      createdAt: entity.createdAt,
-    };
-  }
-
-  static toResponseList(entities: Project[]): ProjectResponseDto[] {
-    return entities.map((entity) => this.toResponse(entity));
   }
 }

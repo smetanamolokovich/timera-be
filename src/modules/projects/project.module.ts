@@ -5,17 +5,17 @@ import { ProjectOrmEntity } from './infra/project.orm-entity';
 import { CreateProjectUseCase } from './application/create-project.usecase';
 import { ProjectRepositoryImpl } from './infra/project.repository.impl';
 import { EmployeesModule } from '../employees/employees.module';
-
+import { REPOSITORY_TOKENS } from '../../common/tokens';
 @Module({
   imports: [EmployeesModule, TypeOrmModule.forFeature([ProjectOrmEntity])],
   controllers: [ProjectController],
   providers: [
     CreateProjectUseCase,
     {
-      provide: 'ProjectRepository',
+      provide: REPOSITORY_TOKENS.ProjectRepository,
       useClass: ProjectRepositoryImpl,
     },
   ],
-  exports: ['ProjectRepository'],
+  exports: [REPOSITORY_TOKENS.ProjectRepository],
 })
 export class ProjectModule {}
