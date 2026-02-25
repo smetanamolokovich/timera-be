@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { UserOrmEntity } from '../../users/infra/user.orm-entity';
 import { OrganizationOrmEntity } from '../../organizations/infra/organization.orm-entity';
-import { TimeEntryOrmEntity } from '../../time-entries/infra/time-entry.orm-entiry';
+import { TimeEntryOrmEntity } from '../../time-entries/infra/time-entry.orm-entity';
 
 @Entity('employees')
 export class EmployeeOrmEntity {

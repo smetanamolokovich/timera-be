@@ -1,5 +1,5 @@
 import { TimeEntry } from '../domain/time-entry';
-import { TimeEntryOrmEntity } from './time-entry.orm-entiry';
+import { TimeEntryOrmEntity } from './time-entry.orm-entity';
 
 export class TimeEntryMapper {
   static toDomain(raw: TimeEntryOrmEntity): TimeEntry {
