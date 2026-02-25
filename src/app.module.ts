@@ -8,6 +8,8 @@ import { EmployeesModule } from './modules/employees/employees.module';
 import { getTypeOrmModuleOptions } from './database/database.config';
 import { ReportsModule } from './modules/reports/reports.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { WorkTypesModule } from './modules/work-types/work-types.module';
+import { TimeEntriesModule } from './modules/time-entries/time-entries.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
     EmployeesModule,
     ReportsModule,
     OrganizationsModule,
+    WorkTypesModule,
+    TimeEntriesModule,
   ],
 })
 export class AppModule {}

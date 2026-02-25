@@ -14,6 +14,7 @@ import {
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { CreateEmployeeUseCase } from '../application/create-employee.usecase';
 import { EmployeePresentationMapper } from './employee.mapper';
+import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 
 @Controller('employees')
 export class EmployeeController {
@@ -37,9 +38,16 @@ export class EmployeeController {
   })
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  async create(@CurrentUser() { id }: JwtUser, @Body() dto: CreateEmployeeDto) {
+  async create(
+    @CurrentUser() { organizationId }: JwtUser,
+    @Body() dto: CreateEmployeeDto,
+  ) {
+    if (!organizationId) {
+      throw new OrganizationIdRequiredError();
+    }
+
     const employee = await this.createEmployeeUseCase.execute(
-      id,
+      organizationId,
       dto.name,
       dto.hourlyRate,
     );

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { CreateProjectUseCase } from '../application/create-project.usecase';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -15,10 +15,16 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ProjectPresentationMapper } from './project.mapper';
+import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
+import { GetProjectsUseCase } from '../application/get-projects.usecase';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('projects')
 export class ProjectController {
-  constructor(private readonly createProjectUseCase: CreateProjectUseCase) {}
+  constructor(
+    private readonly createProjectUseCase: CreateProjectUseCase,
+    private readonly getProjectsUseCase: GetProjectsUseCase,
+  ) {}
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new project' })
@@ -35,14 +41,34 @@ export class ProjectController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected error occurred.',
   })
-  @UseGuards(AuthGuard('jwt'))
   @Post()
   async createProject(
     @CurrentUser() user: JwtUser,
     @Body() dto: CreateProjectDto,
   ) {
-    const project = await this.createProjectUseCase.execute(user.id, dto.name);
+    if (!user.organizationId) throw new OrganizationIdRequiredError();
+
+    const project = await this.createProjectUseCase.execute(
+      user.organizationId,
+      dto.name,
+    );
 
     return ProjectPresentationMapper.toResponse(project);
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'The list of projects has been successfully retrieved.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @Get()
+  async getProjects(@CurrentUser() user: JwtUser) {
+    if (!user.organizationId) throw new OrganizationIdRequiredError();
+
+    const projects = await this.getProjectsUseCase.execute(user.organizationId);
+
+    return ProjectPresentationMapper.toResponseList(projects);
   }
 }

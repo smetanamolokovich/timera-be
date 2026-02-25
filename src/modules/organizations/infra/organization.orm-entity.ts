@@ -43,16 +43,16 @@ export class OrganizationOrmEntity {
   @OneToMany(() => MembershipOrmEntity, (membership) => membership.organization)
   memberships!: MembershipOrmEntity[];
 
-  @Column({ length: 200, nullable: true })
+  @Column({ type: 'varchar', length: 200, nullable: true })
   address?: string | null;
 
-  @Column({ length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   phoneNumber?: string | null;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   email?: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   logoUrl?: string | null;
 
   @Column({ default: true })

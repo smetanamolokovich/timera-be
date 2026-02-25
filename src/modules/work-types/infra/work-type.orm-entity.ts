@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { ProjectOrmEntity } from '../../projects/infra/project.orm-entity';
 
@@ -19,9 +20,9 @@ export class WorkTypeOrmEntity {
   @JoinColumn({ name: 'projectId' })
   project!: ProjectOrmEntity;
 
-  @Column({ length: 100 })
+  @Column({ type: 'varchar', length: 100 })
   name!: string;
 
-  @Column()
+  @CreateDateColumn()
   createdAt!: Date;
 }

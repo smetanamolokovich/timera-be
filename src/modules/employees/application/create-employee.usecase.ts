@@ -11,13 +11,13 @@ export class CreateEmployeeUseCase {
   ) {}
 
   async execute(
-    ownerUserId: string,
+    organizationId: string,
     name: string,
     hourlyRate?: number,
   ): Promise<Employee> {
     const employee = new Employee(
       randomUUID(),
-      ownerUserId,
+      organizationId,
       name,
       hourlyRate ?? null,
       new Date(),

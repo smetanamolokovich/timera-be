@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { TimeEntryRepository } from '../domain/time-entry.repository';
 import { TimeEntryOrmEntity } from './time-entry.orm-entity';
-import { Repository } from 'typeorm/repository/Repository.js';
+import { Repository } from 'typeorm';
 import { TimeEntry } from '../domain/time-entry';
 import { TimeEntryMapper } from './time-entry.mapper';
 import {

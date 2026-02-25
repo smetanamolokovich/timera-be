@@ -23,4 +23,11 @@ export class ProjectRepositoryImpl implements ProjectRepository {
 
     return ProjectMapper.toDomain(row);
   }
+
+  async findByOrganizationId(organizationId: string): Promise<Project[]> {
+    const rows = await this.projectRepository.find({
+      where: { organizationId },
+    });
+    return rows.map((row) => ProjectMapper.toDomain(row));
+  }
 }
