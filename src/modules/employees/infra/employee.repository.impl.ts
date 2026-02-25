@@ -31,4 +31,10 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
 
     return EmployeeMapper.toDomain(row);
   }
+
+  async findByOrganizationId(organizationId: string): Promise<Employee[]> {
+    const rows = await this.repo.find({ where: { organizationId } });
+
+    return rows.map((row) => EmployeeMapper.toDomain(row));
+  }
 }

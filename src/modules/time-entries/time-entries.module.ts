@@ -5,8 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TimeEntryOrmEntity } from './infra/time-entry.orm-entity';
 import { TimeEntryRepositoryImpl } from './infra/time-entry.repository.impl';
 import { CreateTimeEntryUseCase } from './application/create-time-entry.usecase';
+import { GetTimeEntriesByProjectUseCase } from './application/get-time-entries-by-project.usecase';
 import { WorkTypesModule } from '../work-types/work-types.module';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
+import { TimeEntryController } from './presentation/time-entry.controller';
 
 @Module({
   imports: [
@@ -15,9 +17,10 @@ import { REPOSITORY_TOKENS } from '../../common/tokens';
     WorkTypesModule,
     TypeOrmModule.forFeature([TimeEntryOrmEntity]),
   ],
-  controllers: [],
+  controllers: [TimeEntryController],
   providers: [
     CreateTimeEntryUseCase,
+    GetTimeEntriesByProjectUseCase,
     {
       provide: REPOSITORY_TOKENS.TimeEntryRepository,
       useClass: TimeEntryRepositoryImpl,

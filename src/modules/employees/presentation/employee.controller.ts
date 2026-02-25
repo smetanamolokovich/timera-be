@@ -1,9 +1,8 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
   ApiInternalServerErrorResponse,
-  ApiOperation,
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -15,13 +14,17 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { CreateEmployeeUseCase } from '../application/create-employee.usecase';
 import { EmployeePresentationMapper } from './employee.mapper';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
+import { GetEmployeesUseCase } from '../application/get-employees.usecase';
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @Controller('employees')
 export class EmployeeController {
-  constructor(private readonly createEmployeeUseCase: CreateEmployeeUseCase) {}
+  constructor(
+    private readonly createEmployeeUseCase: CreateEmployeeUseCase,
+    private readonly getEmployeesUseCase: GetEmployeesUseCase,
+  ) {}
 
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a new employee' })
   @ApiResponse({
     status: 201,
     description: 'The employee has been successfully created.',
@@ -36,7 +39,6 @@ export class EmployeeController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
-  @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
     @CurrentUser() { organizationId }: JwtUser,
@@ -53,5 +55,21 @@ export class EmployeeController {
     );
 
     return EmployeePresentationMapper.toResponse(employee);
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'The list of employees has been successfully retrieved.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @Get()
+  async getByOrganization(@CurrentUser() { organizationId }: JwtUser) {
+    if (!organizationId) throw new OrganizationIdRequiredError();
+
+    const employees = await this.getEmployeesUseCase.execute(organizationId);
+
+    return EmployeePresentationMapper.toResponseList(employees);
   }
 }
