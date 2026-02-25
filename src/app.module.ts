@@ -6,6 +6,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ProjectModule } from './modules/projects/project.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { getTypeOrmModuleOptions } from './database/database.config';
+import { ReportsModule } from './modules/reports/reports.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { getTypeOrmModuleOptions } from './database/database.config';
     AuthModule,
     ProjectModule,
     EmployeesModule,
+    ReportsModule,
+    OrganizationsModule,
   ],
 })
 export class AppModule {}

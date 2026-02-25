@@ -9,6 +9,7 @@ import { ReportPresentationMapper } from './report.mapper';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
+  ApiQuery,
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -30,6 +31,8 @@ export class ReportController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
+  @ApiQuery({ name: 'fromDate', required: false, type: String })
+  @ApiQuery({ name: 'toDate', required: false, type: String })
   @UseGuards(AuthGuard('jwt'))
   @Get('project-summary')
   async getProjectSummary(

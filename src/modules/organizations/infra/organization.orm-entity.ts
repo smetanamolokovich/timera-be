@@ -1,6 +1,17 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ProjectOrmEntity } from '../../projects/infra/project.orm-entity';
 import { EmployeeOrmEntity } from '../../employees/infra/employee.orm-entity';
+import { UserOrmEntity } from '../../users/infra/user.orm-entity';
+import { MembershipOrmEntity } from '../../memberships/infra/membership.orm-entity';
 
 @Entity('organizations')
 export class OrganizationOrmEntity {
@@ -11,11 +22,39 @@ export class OrganizationOrmEntity {
   name!: string;
 
   @Column()
+  ownerId!: string;
+
+  @ManyToOne(() => UserOrmEntity)
+  @JoinColumn({ name: 'ownerId' })
+  owner!: UserOrmEntity;
+
+  @CreateDateColumn()
   createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 
   @OneToMany(() => ProjectOrmEntity, (project) => project.organization)
   projects!: ProjectOrmEntity[];
 
   @OneToMany(() => EmployeeOrmEntity, (employee) => employee.organization)
   employees!: EmployeeOrmEntity[];
+
+  @OneToMany(() => MembershipOrmEntity, (membership) => membership.organization)
+  memberships!: MembershipOrmEntity[];
+
+  @Column({ length: 200, nullable: true })
+  address?: string | null;
+
+  @Column({ length: 20, nullable: true })
+  phoneNumber?: string | null;
+
+  @Column({ length: 100, nullable: true })
+  email?: string | null;
+
+  @Column({ nullable: true })
+  logoUrl?: string | null;
+
+  @Column({ default: true })
+  isActive!: boolean;
 }

@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InvalidEmailOrPasswordError } from '../domain/errors/invalid-email-or-password.error';
 import type { PasswordHasher } from '../../users/domain/password-hasher';
 import { REPOSITORY_TOKENS, SERVICE_TOKENS } from '../../../common/tokens';
+import type { MembershipRepository } from '../../memberships/domain/interfaces/membership.repository.interface';
 
 export class LoginUserUseCase {
   constructor(
@@ -11,6 +12,8 @@ export class LoginUserUseCase {
     private userRepository: UserRepository,
     @Inject(SERVICE_TOKENS.PasswordHasher)
     private passwordHasher: PasswordHasher,
+    @Inject(REPOSITORY_TOKENS.MembershipRepository)
+    private membershipRepository: MembershipRepository,
     private jwtService: JwtService,
   ) {}
 
@@ -30,7 +33,15 @@ export class LoginUserUseCase {
       throw new InvalidEmailOrPasswordError();
     }
 
-    const payload = { sub: user.id, email: user.email };
+    const memberships = await this.membershipRepository.findByUserId(user.id);
+    const activeMembership = memberships[0] ?? null;
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      organizationId: activeMembership?.organizationId ?? null,
+      role: activeMembership?.role ?? null,
+    };
 
     return {
       accessToken: this.jwtService.sign(payload),

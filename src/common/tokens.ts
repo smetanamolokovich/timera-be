@@ -5,6 +5,8 @@ export const REPOSITORY_TOKENS = {
   ReportRepository: Symbol('ReportRepository'),
   UserRepository: Symbol('UserRepository'),
   WorkTypeRepository: Symbol('WorkTypeRepository'),
+  OrganizationRepository: Symbol('OrganizationRepository'),
+  MembershipRepository: Symbol('MembershipRepository'),
 } as const;
 
 export const SERVICE_TOKENS = {

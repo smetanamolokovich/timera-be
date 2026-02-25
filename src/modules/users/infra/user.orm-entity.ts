@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+} from 'typeorm';
 import { EmployeeOrmEntity } from '../../employees/infra/employee.orm-entity';
+import { MembershipOrmEntity } from '../../memberships/infra/membership.orm-entity';
 
 @Entity('users')
 export class UserOrmEntity {
@@ -12,9 +19,12 @@ export class UserOrmEntity {
   @Column()
   passwordHash!: string;
 
-  @Column()
+  @CreateDateColumn()
   createdAt!: Date;
 
   @OneToMany(() => EmployeeOrmEntity, (employee) => employee.user)
   employees!: EmployeeOrmEntity[];
+
+  @OneToMany(() => MembershipOrmEntity, (membership) => membership.user)
+  memberships!: MembershipOrmEntity[];
 }
