@@ -29,6 +29,12 @@ export class UsersController {
     const user = await this.registerUserUseCase.execute(
       dto.email,
       dto.password,
+      dto.firstName,
+      dto.lastName,
+      dto.timezone,
+      dto.locale,
+      dto.avatarUrl,
+      dto.phone,
     );
 
     return UserPresentationMapper.toResponse(user);

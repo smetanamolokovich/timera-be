@@ -3,7 +3,14 @@ export class User {
     public readonly id: string,
     public email: string,
     private passwordHash: string,
-    public createdAt: Date,
+    public readonly createdAt: Date,
+    public updatedAt: Date,
+    public firstName: string,
+    public lastName: string,
+    public timezone?: string,
+    public locale?: string,
+    public avatarUrl?: string,
+    public phone?: string,
   ) {
     this.validateEmail(email);
   }

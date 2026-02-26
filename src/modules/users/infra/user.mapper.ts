@@ -8,6 +8,13 @@ export class UserMapper {
       entity.email,
       entity.passwordHash,
       entity.createdAt,
+      entity.updatedAt,
+      entity.firstName,
+      entity.lastName,
+      entity.timezone,
+      entity.locale,
+      entity.avatarUrl,
+      entity.phone,
     );
   }
 
@@ -17,6 +24,13 @@ export class UserMapper {
     orm.email = user.email;
     orm.passwordHash = user.getPasswordHash();
     orm.createdAt = user.createdAt;
+    orm.updatedAt = user.updatedAt;
+    orm.timezone = user.timezone;
+    orm.locale = user.locale;
+    orm.firstName = user.firstName;
+    orm.lastName = user.lastName;
+    orm.avatarUrl = user.avatarUrl;
+    orm.phone = user.phone;
 
     return orm;
   }

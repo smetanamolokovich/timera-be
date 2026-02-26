@@ -29,6 +29,6 @@ export class UserRepositoryImpl implements UserRepository {
 
     if (!row) return null;
 
-    return new User(row.id, row.email, row.passwordHash, row.createdAt);
+    return UserMapper.toDomain(row);
   }
 }

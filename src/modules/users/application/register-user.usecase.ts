@@ -15,7 +15,16 @@ export class RegisterUserUseCase {
     private passwordHasher: PasswordHasher,
   ) {}
 
-  async execute(email: string, password: string): Promise<User> {
+  async execute(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    timezone?: string,
+    locale?: string,
+    avatarUrl?: string,
+    phone?: string,
+  ): Promise<User> {
     const existingUser = await this.userRepository.findByEmail(email);
 
     if (existingUser) {
@@ -28,7 +37,21 @@ export class RegisterUserUseCase {
 
     const passwordHash = await this.passwordHasher.hash(password);
 
-    const user = new User(randomUUID(), email, passwordHash, new Date());
+    const now = new Date();
+
+    const user = new User(
+      randomUUID(),
+      email,
+      passwordHash,
+      now,
+      now,
+      firstName,
+      lastName,
+      timezone,
+      locale,
+      avatarUrl,
+      phone,
+    );
 
     await this.userRepository.save(user);
 
