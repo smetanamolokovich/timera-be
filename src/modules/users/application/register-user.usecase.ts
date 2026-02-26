@@ -6,6 +6,7 @@ import { EmailAlreadyExistsError } from '../domain/errors/email-already-exists.e
 import { InvalidPasswordError } from '../domain/errors/invalid-password.error';
 import type { PasswordHasher } from '../domain/password-hasher';
 import { REPOSITORY_TOKENS, SERVICE_TOKENS } from '../../../common/tokens';
+import { AcceptInvitationUseCase } from '../../invitations/application/accept-invitation.usecase';
 
 export class RegisterUserUseCase {
   constructor(
@@ -13,6 +14,7 @@ export class RegisterUserUseCase {
     private userRepository: UserRepository,
     @Inject(SERVICE_TOKENS.PasswordHasher)
     private passwordHasher: PasswordHasher,
+    private readonly acceptInvitationUseCase: AcceptInvitationUseCase,
   ) {}
 
   async execute(
@@ -24,6 +26,7 @@ export class RegisterUserUseCase {
     locale?: string,
     avatarUrl?: string,
     phone?: string,
+    inviteToken?: string,
   ): Promise<User> {
     const existingUser = await this.userRepository.findByEmail(email);
 
@@ -54,6 +57,10 @@ export class RegisterUserUseCase {
     );
 
     await this.userRepository.save(user);
+
+    if (inviteToken) {
+      await this.acceptInvitationUseCase.execute(user.id, inviteToken);
+    }
 
     return user;
   }

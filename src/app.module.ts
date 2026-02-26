@@ -10,6 +10,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { WorkTypesModule } from './modules/work-types/work-types.module';
 import { TimeEntriesModule } from './modules/time-entries/time-entries.module';
+import { InvitationsModule } from './modules/invitations/invitations.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { TimeEntriesModule } from './modules/time-entries/time-entries.module';
     OrganizationsModule,
     WorkTypesModule,
     TimeEntriesModule,
+    InvitationsModule,
   ],
 })
 export class AppModule {}

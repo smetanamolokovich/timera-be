@@ -4,7 +4,10 @@ import { REPOSITORY_TOKENS } from '../../../common/tokens';
 import { Organization } from '../domain/organization';
 import type { UserRepository } from '../../users/domain/user.repository';
 import type { MembershipRepository } from '../../memberships/domain/interfaces/membership.repository.interface';
-import { Membership } from '../../memberships/domain/membership';
+import {
+  Membership,
+  OrganizationRoleEnum,
+} from '../../memberships/domain/membership';
 
 @Injectable()
 export class CreateOrganizationUseCase {
@@ -51,7 +54,7 @@ export class CreateOrganizationUseCase {
       crypto.randomUUID(),
       userId,
       organization.id,
-      'OWNER',
+      OrganizationRoleEnum.OWNER,
       now,
     );
     await this.membershipRepository.save(membership);

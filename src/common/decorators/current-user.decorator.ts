@@ -1,11 +1,11 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { OrganizationRole } from '../../modules/memberships/domain/membership';
+import { OrganizationRoleEnum } from '../../modules/memberships/domain/membership';
 
 export interface JwtUser {
   id: string;
   email: string;
   organizationId: string | null;
-  role: OrganizationRole | null;
+  role: OrganizationRoleEnum | null;
 }
 
 export const CurrentUser = createParamDecorator(

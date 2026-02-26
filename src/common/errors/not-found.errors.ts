@@ -1,9 +1,9 @@
 import { ApplicationError } from './application.error';
 
-export abstract class NotFoundError extends ApplicationError {
+export class NotFoundError extends ApplicationError {
   readonly statusCode = 404;
 
-  constructor(message: string) {
+  constructor(message: string = 'Not Found') {
     super(message);
   }
 }

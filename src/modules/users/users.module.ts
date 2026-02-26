@@ -6,9 +6,10 @@ import { UserRepositoryImpl } from './infra/user.repository.impl';
 import { UsersController } from './presentation/users.controller';
 import { BcryptPasswordHasher } from './infra/bcrypt-password-hasher';
 import { REPOSITORY_TOKENS, SERVICE_TOKENS } from '../../common/tokens';
+import { InvitationsModule } from '../invitations/invitations.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserOrmEntity])],
+  imports: [TypeOrmModule.forFeature([UserOrmEntity]), InvitationsModule],
   controllers: [UsersController],
   providers: [
     RegisterUserUseCase,

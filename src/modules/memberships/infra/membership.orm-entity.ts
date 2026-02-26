@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { UserOrmEntity } from '../../users/infra/user.orm-entity';
 import { OrganizationOrmEntity } from '../../organizations/infra/organization.orm-entity';
-import type { OrganizationRole } from '../domain/membership';
+import { OrganizationRoleEnum } from '../domain/membership';
 
 @Entity('memberships')
 export class MembershipOrmEntity {
@@ -35,8 +35,8 @@ export class MembershipOrmEntity {
   @JoinColumn({ name: 'organizationId' })
   organization!: OrganizationOrmEntity;
 
-  @Column({ type: 'varchar' })
-  role!: OrganizationRole;
+  @Column({ type: 'enum', enum: OrganizationRoleEnum })
+  role!: OrganizationRoleEnum;
 
   @CreateDateColumn()
   createdAt!: Date;

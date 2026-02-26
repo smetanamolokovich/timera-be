@@ -35,6 +35,7 @@ export class UsersController {
       dto.locale,
       dto.avatarUrl,
       dto.phone,
+      dto.inviteToken,
     );
 
     return UserPresentationMapper.toResponse(user);

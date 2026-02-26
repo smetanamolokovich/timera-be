@@ -7,6 +7,7 @@ export const REPOSITORY_TOKENS = {
   WorkTypeRepository: Symbol('WorkTypeRepository'),
   OrganizationRepository: Symbol('OrganizationRepository'),
   MembershipRepository: Symbol('MembershipRepository'),
+  InvitationRepository: Symbol('InvitationRepository'),
 } as const;
 
 export const SERVICE_TOKENS = {
