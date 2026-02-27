@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RegisterUserUseCase } from './application/register-user.usecase';
+import { GetMeUseCase } from './application/get-me.usecase';
+import { UpdateMeUseCase } from './application/update-me.usecase';
 import { UserOrmEntity } from './infra/user.orm-entity';
 import { UserRepositoryImpl } from './infra/user.repository.impl';
 import { UsersController } from './presentation/users.controller';
@@ -13,6 +15,8 @@ import { InvitationsModule } from '../invitations/invitations.module';
   controllers: [UsersController],
   providers: [
     RegisterUserUseCase,
+    GetMeUseCase,
+    UpdateMeUseCase,
     {
       provide: REPOSITORY_TOKENS.UserRepository,
       useClass: UserRepositoryImpl,

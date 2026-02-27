@@ -31,4 +31,8 @@ export class UserRepositoryImpl implements UserRepository {
 
     return UserMapper.toDomain(row);
   }
+
+  async update(user: User): Promise<void> {
+    await this.save(user);
+  }
 }
