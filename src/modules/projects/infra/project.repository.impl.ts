@@ -47,7 +47,7 @@ export class ProjectRepositoryImpl implements ProjectRepository {
         page,
         limit,
         nextCursor: rows.length ? rows[rows.length - 1].id : null,
-        hasNextPage: rows.length === limit,
+        hasNextPage: (page - 1) * limit + rows.length < total,
       },
     };
   }
