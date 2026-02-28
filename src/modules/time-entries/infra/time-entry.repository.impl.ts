@@ -47,6 +47,8 @@ export class TimeEntryRepositoryImpl implements TimeEntryRepository {
   ): Promise<PaginatedResponseDto<TimeEntry>> {
     const page = paginationQuery.page ?? 1;
     const limit = paginationQuery.limit ?? 20;
+    const sortBy = paginationQuery.sortBy ?? 'date';
+    const sortOrder = paginationQuery.sortOrder ?? 'DESC';
     const where: FindOptionsWhere<TimeEntryOrmEntity> = { projectId };
 
     if (fromDate && toDate) {
@@ -61,7 +63,7 @@ export class TimeEntryRepositoryImpl implements TimeEntryRepository {
       where,
       skip: (page - 1) * limit,
       take: limit,
-      order: { date: 'DESC' },
+      order: { [sortBy]: sortOrder } as Record<string, 'ASC' | 'DESC'>,
     });
 
     return {

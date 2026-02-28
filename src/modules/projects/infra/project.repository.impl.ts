@@ -32,12 +32,14 @@ export class ProjectRepositoryImpl implements ProjectRepository {
   ): Promise<PaginatedResponseDto<Project>> {
     const page = paginationQuery.page ?? 1;
     const limit = paginationQuery.limit ?? 20;
+    const sortBy = paginationQuery.sortBy ?? 'createdAt';
+    const sortOrder = paginationQuery.sortOrder ?? 'DESC';
 
     const [rows, total] = await this.projectRepository.findAndCount({
       where: { organizationId },
       skip: (page - 1) * limit,
       take: limit,
-      order: { createdAt: 'DESC' },
+      order: { [sortBy]: sortOrder } as Record<string, 'ASC' | 'DESC'>,
     });
 
     return {

@@ -26,7 +26,11 @@ import { GetProjectsUseCase } from '../application/get-projects.usecase';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
-import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import {
+  GetProjectsQueryDto,
+  ProjectSortByEnum,
+} from './dto/get-projects-query.dto';
+import { SortOrderEnum } from '../../../common/dto/pagination-query.dto';
 import { PaginationMetaDto } from '../../../common/dto/paginated-response.dto';
 
 @ApiTags('Projects')
@@ -91,19 +95,21 @@ export class ProjectController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
+  @ApiQuery({ name: 'sortBy', required: false, enum: ProjectSortByEnum })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrderEnum })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
   @ApiQuery({ name: 'cursor', required: false, type: String })
   @Get()
   async getProjects(
     @CurrentUser() user: JwtUser,
-    @Query() pagination: PaginationQueryDto,
+    @Query() query: GetProjectsQueryDto,
   ) {
     if (!user.organizationId) throw new OrganizationIdRequiredError();
 
     const result = await this.getProjectsUseCase.execute(
       user.organizationId,
-      pagination,
+      query,
     );
 
     return {

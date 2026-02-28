@@ -20,7 +20,11 @@ import {
 import { CreateTimeEntryDto } from './dto/create-time-entry.dto';
 import { TimeEntryPresentationMapper } from './time-entry.mapper';
 import { TimeEntryResponseDto } from './dto/time-entry-response.dto';
-import { GetTimeEntriesQueryDto } from './dto/get-time-entries-query.dto';
+import {
+  GetTimeEntriesQueryDto,
+  TimeEntrySortByEnum,
+} from './dto/get-time-entries-query.dto';
+import { SortOrderEnum } from '../../../common/dto/pagination-query.dto';
 import { PaginationMetaDto } from '../../../common/dto/paginated-response.dto';
 
 @ApiTags('Time Entries')
@@ -94,6 +98,8 @@ export class TimeEntryController {
     type: String,
     example: '2026-01-31',
   })
+  @ApiQuery({ name: 'sortBy', required: false, enum: TimeEntrySortByEnum })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrderEnum })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
   @ApiQuery({ name: 'cursor', required: false, type: String })

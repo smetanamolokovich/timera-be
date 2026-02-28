@@ -44,12 +44,14 @@ export class WorkTypeRepositoryImpl implements WorkTypeRepository {
   ): Promise<PaginatedResponseDto<WorkType>> {
     const page = paginationQuery.page ?? 1;
     const limit = paginationQuery.limit ?? 20;
+    const sortBy = paginationQuery.sortBy ?? 'createdAt';
+    const sortOrder = paginationQuery.sortOrder ?? 'DESC';
 
     const [rows, total] = await this.repository.findAndCount({
       where: { projectId },
       skip: (page - 1) * limit,
       take: limit,
-      order: { createdAt: 'DESC' },
+      order: { [sortBy]: sortOrder } as Record<string, 'ASC' | 'DESC'>,
     });
 
     return {

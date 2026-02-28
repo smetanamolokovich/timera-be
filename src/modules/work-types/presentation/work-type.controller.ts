@@ -28,7 +28,11 @@ import { OrganizationIdRequiredError } from '../../../common/errors/organization
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
-import { WorkTypeQueryDto } from './dto/work-type-query.dto';
+import {
+  WorkTypeQueryDto,
+  WorkTypeSortByEnum,
+} from './dto/work-type-query.dto';
+import { SortOrderEnum } from '../../../common/dto/pagination-query.dto';
 import { PaginationMetaDto } from '../../../common/dto/paginated-response.dto';
 
 @ApiTags('Work Types')
@@ -66,6 +70,8 @@ export class WorkTypeController {
     type: String,
     description: 'Project ID',
   })
+  @ApiQuery({ name: 'sortBy', required: false, enum: WorkTypeSortByEnum })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrderEnum })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
   @ApiQuery({ name: 'cursor', required: false, type: String })
