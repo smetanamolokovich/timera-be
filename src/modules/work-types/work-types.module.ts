@@ -5,6 +5,7 @@ import { WorkTypeRepositoryImpl } from './infra/work-type.repository.impl';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
 import { GetWorkTypesUseCase } from './application/get-work-types.usecase';
 import { CreateWorkTypeUseCase } from './application/create-work-type.usecase';
+import { CreateWorkTypesBulkUseCase } from './application/create-work-types-bulk.usecase';
 import { WorkTypeController } from './presentation/work-type.controller';
 import { ProjectModule } from '../projects/project.module';
 
@@ -14,6 +15,7 @@ import { ProjectModule } from '../projects/project.module';
   providers: [
     GetWorkTypesUseCase,
     CreateWorkTypeUseCase,
+    CreateWorkTypesBulkUseCase,
     {
       provide: REPOSITORY_TOKENS.WorkTypeRepository,
       useClass: WorkTypeRepositoryImpl,

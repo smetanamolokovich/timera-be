@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { GetWorkTypesUseCase } from '../application/get-work-types.usecase';
 import { CreateWorkTypeUseCase } from '../application/create-work-type.usecase';
+import { CreateWorkTypesBulkUseCase } from '../application/create-work-types-bulk.usecase';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/swagger';
 import { WorkTypePresentationMapper } from './work-type.mapper';
 import { CreateWorkTypeDto } from './dto/create-work-type.dto';
+import { CreateWorkTypesBulkDto } from './dto/create-work-types-bulk.dto';
 import {
   CurrentUser,
   type JwtUser,
@@ -23,6 +25,7 @@ import { OrganizationIdRequiredError } from '../../../common/errors/organization
 export class WorkTypeController {
   constructor(
     private readonly createWorkTypeUseCase: CreateWorkTypeUseCase,
+    private readonly createWorkTypesBulkUseCase: CreateWorkTypesBulkUseCase,
     private readonly getWorkTypesUseCase: GetWorkTypesUseCase,
   ) {}
 
@@ -63,5 +66,30 @@ export class WorkTypeController {
     );
 
     return WorkTypePresentationMapper.toResponse(workType);
+  }
+
+  @ApiCreatedResponse({
+    description: 'Work types have been successfully created.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request. Please check the input data.',
+  })
+  @Post('bulk')
+  async createWorkTypesBulk(
+    @CurrentUser() user: JwtUser,
+    @Body() dto: CreateWorkTypesBulkDto,
+  ) {
+    if (!user.organizationId) throw new OrganizationIdRequiredError();
+
+    const workTypes = await this.createWorkTypesBulkUseCase.execute(
+      user.organizationId,
+      dto.projectId,
+      dto.names,
+    );
+
+    return WorkTypePresentationMapper.toResponseList(workTypes);
   }
 }
