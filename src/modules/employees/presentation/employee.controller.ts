@@ -90,6 +90,11 @@ export class EmployeeController {
   ) {
     if (!organizationId) throw new OrganizationIdRequiredError();
 
-    return this.getEmployeesUseCase.execute(organizationId, pagination);
+    const result = await this.getEmployeesUseCase.execute(organizationId, pagination);
+
+    return {
+      ...result,
+      data: result.data.map(EmployeePresentationMapper.toResponse),
+    };
   }
 }
