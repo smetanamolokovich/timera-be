@@ -7,6 +7,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -20,6 +21,7 @@ import {
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
+import { RolesGuard } from '../../../common/guards/roles.guard';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -54,7 +56,11 @@ export class WorkTypeController {
   @ApiBadRequestResponse({
     description: 'Bad Request. Please check the input data.',
   })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
   @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
   @Post()
   async createWorkType(
     @CurrentUser() user: JwtUser,
@@ -80,7 +86,11 @@ export class WorkTypeController {
   @ApiBadRequestResponse({
     description: 'Bad Request. Please check the input data.',
   })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
   @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
   @Post('bulk')
   async createWorkTypesBulk(
     @CurrentUser() user: JwtUser,

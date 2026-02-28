@@ -15,6 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
+import { RolesGuard } from '../../../common/guards/roles.guard';
 
 @Controller('reports')
 export class ReportController {
@@ -36,7 +37,7 @@ export class ReportController {
   @ApiQuery({ name: 'fromDate', required: false, type: String })
   @ApiQuery({ name: 'toDate', required: false, type: String })
   @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('project-summary')
   async getProjectSummary(
     @CurrentUser() user: JwtUser,

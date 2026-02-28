@@ -9,6 +9,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiResponse,
@@ -19,6 +20,7 @@ import { OrganizationIdRequiredError } from '../../../common/errors/organization
 import { GetProjectsUseCase } from '../application/get-projects.usecase';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
+import { RolesGuard } from '../../../common/guards/roles.guard';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('projects')
@@ -43,7 +45,11 @@ export class ProjectController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected error occurred.',
   })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
   @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
   @Post()
   async createProject(
     @CurrentUser() user: JwtUser,

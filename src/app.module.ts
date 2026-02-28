@@ -31,6 +31,6 @@ import { RolesGuard } from './common/guards/roles.guard';
     TimeEntriesModule,
     InvitationsModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: RolesGuard }],
+  providers: [RolesGuard],
 })
 export class AppModule {}

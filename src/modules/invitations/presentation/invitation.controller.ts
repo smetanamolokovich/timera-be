@@ -6,6 +6,7 @@ import { SwitchOrgUseCase } from '../../auth/application/switch-org.usecase';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiResponse,
@@ -23,6 +24,7 @@ import { AccessDeniedError } from '../../../common/errors/access-denied.error';
 import { InvalidEnvVarsError } from '../../../common/errors/invalid-env-vars.error';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
+import { RolesGuard } from '../../../common/guards/roles.guard';
 
 @ApiTags('invitations')
 @Controller('invitations')
@@ -42,8 +44,11 @@ export class InvitationController {
     type: InvitationResponseDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
   @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
   async create(
     @CurrentUser() user: JwtUser,
