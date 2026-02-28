@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { GetWorkTypesUseCase } from '../application/get-work-types.usecase';
 import { CreateWorkTypeUseCase } from '../application/create-work-type.usecase';
 import { CreateWorkTypesBulkUseCase } from '../application/create-work-types-bulk.usecase';
@@ -8,7 +16,11 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { WorkTypePresentationMapper } from './work-type.mapper';
@@ -22,7 +34,9 @@ import { OrganizationIdRequiredError } from '../../../common/errors/organization
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
+@ApiTags('Work Types')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('work-types')
@@ -33,6 +47,7 @@ export class WorkTypeController {
     private readonly getWorkTypesUseCase: GetWorkTypesUseCase,
   ) {}
 
+  @ApiOperation({ summary: 'List work types for a project' })
   @ApiResponse({
     status: 200,
     description: 'The list of work types has been successfully retrieved.',
@@ -40,13 +55,19 @@ export class WorkTypeController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
-  @Get()
-  async getWorkTypes(@Query('projectId') projectId: string) {
-    const workTypes = await this.getWorkTypesUseCase.execute(projectId);
-
-    return WorkTypePresentationMapper.toResponseList(workTypes);
+  @ApiParam({ name: 'projectId', type: String, description: 'Project ID' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({ name: 'cursor', required: false, type: String })
+  @Get(':projectId')
+  async getWorkTypes(
+    @Param('projectId') projectId: string,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    return this.getWorkTypesUseCase.execute(projectId, pagination);
   }
 
+  @ApiOperation({ summary: 'Create a work type' })
   @ApiCreatedResponse({
     description: 'The work type has been successfully created.',
   })
@@ -77,6 +98,7 @@ export class WorkTypeController {
     return WorkTypePresentationMapper.toResponse(workType);
   }
 
+  @ApiOperation({ summary: 'Bulk create work types' })
   @ApiCreatedResponse({
     description: 'Work types have been successfully created.',
   })

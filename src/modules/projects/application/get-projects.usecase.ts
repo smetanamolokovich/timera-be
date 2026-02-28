@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REPOSITORY_TOKENS } from '../../../common/tokens';
 import type { ProjectRepository } from '../domain/project.repository';
-import { Project } from '../domain/project';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
 @Injectable()
 export class GetProjectsUseCase {
@@ -10,7 +10,10 @@ export class GetProjectsUseCase {
     private readonly projectRepository: ProjectRepository,
   ) {}
 
-  async execute(organizationId: string): Promise<Project[]> {
-    return this.projectRepository.findByOrganizationId(organizationId);
+  async execute(organizationId: string, paginationQuery: PaginationQueryDto) {
+    return this.projectRepository.findByOrganizationId(
+      organizationId,
+      paginationQuery,
+    );
   }
 }

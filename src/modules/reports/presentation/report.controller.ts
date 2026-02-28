@@ -9,14 +9,17 @@ import { ReportPresentationMapper } from './report.mapper';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
+  ApiOperation,
   ApiQuery,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 
+@ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
   constructor(
@@ -24,6 +27,7 @@ export class ReportController {
   ) {}
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get project summary report' })
   @ApiResponse({
     status: 200,
     description: 'The project summary report has been successfully retrieved.',

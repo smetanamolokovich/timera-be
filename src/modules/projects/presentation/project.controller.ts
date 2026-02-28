@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { CreateProjectUseCase } from '../application/create-project.usecase';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -12,7 +12,9 @@ import {
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ProjectPresentationMapper } from './project.mapper';
@@ -21,7 +23,10 @@ import { GetProjectsUseCase } from '../application/get-projects.usecase';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
+@ApiTags('Projects')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('projects')
 export class ProjectController {
@@ -30,7 +35,6 @@ export class ProjectController {
     private readonly getProjectsUseCase: GetProjectsUseCase,
   ) {}
 
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new project' })
   @ApiResponse({
     status: 201,
@@ -65,6 +69,7 @@ export class ProjectController {
     return ProjectPresentationMapper.toResponse(project);
   }
 
+  @ApiOperation({ summary: 'List projects in the organization' })
   @ApiResponse({
     status: 200,
     description: 'The list of projects has been successfully retrieved.',
@@ -72,12 +77,16 @@ export class ProjectController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({ name: 'cursor', required: false, type: String })
   @Get()
-  async getProjects(@CurrentUser() user: JwtUser) {
+  async getProjects(
+    @CurrentUser() user: JwtUser,
+    @Query() pagination: PaginationQueryDto,
+  ) {
     if (!user.organizationId) throw new OrganizationIdRequiredError();
 
-    const projects = await this.getProjectsUseCase.execute(user.organizationId);
-
-    return ProjectPresentationMapper.toResponseList(projects);
+    return this.getProjectsUseCase.execute(user.organizationId, pagination);
   }
 }
