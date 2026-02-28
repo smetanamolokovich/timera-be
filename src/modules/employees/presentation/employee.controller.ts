@@ -4,11 +4,13 @@ import {
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiExtraModels,
   ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import {
   CurrentUser,
@@ -17,14 +19,17 @@ import {
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { CreateEmployeeUseCase } from '../application/create-employee.usecase';
 import { EmployeePresentationMapper } from './employee.mapper';
+import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 import { GetEmployeesUseCase } from '../application/get-employees.usecase';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { PaginationMetaDto } from '../../../common/dto/paginated-response.dto';
 
 @ApiTags('Employees')
+@ApiExtraModels(PaginationMetaDto, EmployeeResponseDto)
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('employees')
@@ -76,6 +81,15 @@ export class EmployeeController {
   @ApiResponse({
     status: 200,
     description: 'The list of employees has been successfully retrieved.',
+    schema: {
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(EmployeeResponseDto) },
+        },
+        meta: { $ref: getSchemaPath(PaginationMetaDto) },
+      },
+    },
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
@@ -90,11 +104,16 @@ export class EmployeeController {
   ) {
     if (!organizationId) throw new OrganizationIdRequiredError();
 
-    const result = await this.getEmployeesUseCase.execute(organizationId, pagination);
+    const result = await this.getEmployeesUseCase.execute(
+      organizationId,
+      pagination,
+    );
 
     return {
       ...result,
-      data: result.data.map(EmployeePresentationMapper.toResponse),
+      data: result.data.map((row) =>
+        EmployeePresentationMapper.toResponse(row),
+      ),
     };
   }
 }

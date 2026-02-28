@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { GetWorkTypesUseCase } from '../application/get-work-types.usecase';
 import { CreateWorkTypeUseCase } from '../application/create-work-type.usecase';
 import { CreateWorkTypesBulkUseCase } from '../application/create-work-types-bulk.usecase';
@@ -15,15 +7,17 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiExtraModels,
   ApiForbiddenResponse,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { WorkTypePresentationMapper } from './work-type.mapper';
+import { WorkTypeResponseDto } from './dto/work-type-response.dto';
 import { CreateWorkTypeDto } from './dto/create-work-type.dto';
 import { CreateWorkTypesBulkDto } from './dto/create-work-types-bulk.dto';
 import {
@@ -34,9 +28,11 @@ import { OrganizationIdRequiredError } from '../../../common/errors/organization
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
-import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { WorkTypeQueryDto } from './dto/work-type-query.dto';
+import { PaginationMetaDto } from '../../../common/dto/paginated-response.dto';
 
 @ApiTags('Work Types')
+@ApiExtraModels(PaginationMetaDto, WorkTypeResponseDto)
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('work-types')
@@ -51,26 +47,42 @@ export class WorkTypeController {
   @ApiResponse({
     status: 200,
     description: 'The list of work types has been successfully retrieved.',
+    schema: {
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(WorkTypeResponseDto) },
+        },
+        meta: { $ref: getSchemaPath(PaginationMetaDto) },
+      },
+    },
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
-  @ApiParam({ name: 'projectId', type: String, description: 'Project ID' })
+  @ApiQuery({
+    name: 'projectId',
+    required: true,
+    type: String,
+    description: 'Project ID',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
   @ApiQuery({ name: 'cursor', required: false, type: String })
-  @Get(':projectId')
-  async getWorkTypes(
-    @Param('projectId') projectId: string,
-    @Query() pagination: PaginationQueryDto,
-  ) {
-    const result = await this.getWorkTypesUseCase.execute(projectId, pagination);
+  @Get()
+  async getWorkTypes(@Query() query: WorkTypeQueryDto) {
+    const result = await this.getWorkTypesUseCase.execute(
+      query.projectId,
+      query,
+    );
 
     const { data, ...paginationMeta } = result;
 
     return {
       ...paginationMeta,
-      data: data.map((workType) => WorkTypePresentationMapper.toResponse(workType)),
+      data: data.map((workType) =>
+        WorkTypePresentationMapper.toResponse(workType),
+      ),
     };
   }
 

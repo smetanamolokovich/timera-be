@@ -10,22 +10,27 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
+  ApiExtraModels,
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { ProjectPresentationMapper } from './project.mapper';
+import { ProjectResponseDto } from './dto/project-response.dto';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 import { GetProjectsUseCase } from '../application/get-projects.usecase';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { PaginationMetaDto } from '../../../common/dto/paginated-response.dto';
 
 @ApiTags('Projects')
+@ApiExtraModels(PaginationMetaDto, ProjectResponseDto)
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('projects')
@@ -73,6 +78,15 @@ export class ProjectController {
   @ApiResponse({
     status: 200,
     description: 'The list of projects has been successfully retrieved.',
+    schema: {
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(ProjectResponseDto) },
+        },
+        meta: { $ref: getSchemaPath(PaginationMetaDto) },
+      },
+    },
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',

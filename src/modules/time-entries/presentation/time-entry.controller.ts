@@ -4,11 +4,13 @@ import { GetTimeEntriesByProjectUseCase } from '../application/get-time-entries-
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiExtraModels,
   ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -17,9 +19,12 @@ import {
 } from '../../../common/decorators/current-user.decorator';
 import { CreateTimeEntryDto } from './dto/create-time-entry.dto';
 import { TimeEntryPresentationMapper } from './time-entry.mapper';
+import { TimeEntryResponseDto } from './dto/time-entry-response.dto';
 import { GetTimeEntriesQueryDto } from './dto/get-time-entries-query.dto';
+import { PaginationMetaDto } from '../../../common/dto/paginated-response.dto';
 
 @ApiTags('Time Entries')
+@ApiExtraModels(PaginationMetaDto, TimeEntryResponseDto)
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('time-entries')
@@ -58,6 +63,15 @@ export class TimeEntryController {
   @ApiResponse({
     status: 200,
     description: 'The list of time entries has been successfully retrieved.',
+    schema: {
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(TimeEntryResponseDto) },
+        },
+        meta: { $ref: getSchemaPath(PaginationMetaDto) },
+      },
+    },
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
@@ -88,12 +102,19 @@ export class TimeEntryController {
     @CurrentUser() user: JwtUser,
     @Query() query: GetTimeEntriesQueryDto,
   ) {
-    return this.getTimeEntriesByProjectUseCase.execute(
+    const result = await this.getTimeEntriesByProjectUseCase.execute(
       user.id,
       query.projectId,
       query,
       query.fromDate ? new Date(query.fromDate) : undefined,
       query.toDate ? new Date(query.toDate) : undefined,
     );
+
+    return {
+      ...result,
+      data: result.data.map((timeEntry) =>
+        TimeEntryPresentationMapper.toResponse(timeEntry),
+      ),
+    };
   }
 }

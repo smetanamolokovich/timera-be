@@ -18,6 +18,7 @@ export class PaginationMetaDto {
 }
 
 export class PaginatedResponseDto<T> {
+  @ApiProperty({ type: 'array', items: { type: 'object' } })
   data!: T[];
 
   @ApiProperty({ type: () => PaginationMetaDto })
