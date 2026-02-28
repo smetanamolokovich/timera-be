@@ -45,6 +45,7 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
       where: { organizationId },
       skip: (page - 1) * limit,
       take: limit,
+      order: { id: 'ASC' },
     });
 
     return {
