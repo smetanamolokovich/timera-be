@@ -8,6 +8,7 @@ import {
   Membership,
   OrganizationRoleEnum,
 } from '../../memberships/domain/membership';
+import { NotFoundError } from '../../../common/errors/not-found.errors';
 
 @Injectable()
 export class CreateOrganizationUseCase {
@@ -30,9 +31,7 @@ export class CreateOrganizationUseCase {
     isActive?: boolean,
   ): Promise<Organization> {
     const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
+    if (!user) throw new NotFoundError(`User with ID ${userId} not found`);
 
     const now = new Date();
 

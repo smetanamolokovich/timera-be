@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { LoginUserUseCase } from '../application/login-user.usecase';
+import { SwitchOrgUseCase } from '../application/switch-org.usecase';
 import { LoginDto } from './dto/login.dto';
+import { SwitchOrgDto } from './dto/sign-org.dto';
 import { AuthGuard } from '@nestjs/passport';
 import {
   CurrentUser,
@@ -11,12 +13,17 @@ import {
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+@ApiTags('Authorization')
 @Controller('auth')
 export class AuthController {
-  constructor(private loginUserUseCase: LoginUserUseCase) {}
+  constructor(
+    private loginUserUseCase: LoginUserUseCase,
+    private switchOrgUseCase: SwitchOrgUseCase,
+  ) {}
 
   @ApiOperation({ summary: 'Login user and get JWT token' })
   @ApiResponse({
@@ -33,6 +40,25 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto) {
     return this.loginUserUseCase.execute(dto.email, dto.password);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Switch active organization and get new JWT token' })
+  @ApiResponse({
+    status: 201,
+    description: 'New token with updated organizationId',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized or not a member of this organization',
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Post('switch-org')
+  async switchOrg(@CurrentUser() user: JwtUser, @Body() dto: SwitchOrgDto) {
+    return this.switchOrgUseCase.execute(
+      user.id,
+      user.email,
+      dto.organizationId,
+    );
   }
 
   @ApiBearerAuth()

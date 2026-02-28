@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { GetInvitationByTokenUseCase } from '../application/get-invitation-by-token.usecase';
 import { CreateInvitationUseCase } from '../application/create-invitation.usecase';
+import { AcceptInvitationUseCase } from '../application/accept-invitation.usecase';
+import { SwitchOrgUseCase } from '../../auth/application/switch-org.usecase';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
@@ -26,6 +28,8 @@ export class InvitationController {
   constructor(
     private readonly createInvitationUseCase: CreateInvitationUseCase,
     private readonly getInvitationByTokenUseCase: GetInvitationByTokenUseCase,
+    private readonly acceptInvitationUseCase: AcceptInvitationUseCase,
+    private readonly switchOrgUseCase: SwitchOrgUseCase,
   ) {}
 
   @ApiBearerAuth()
@@ -71,5 +75,29 @@ export class InvitationController {
     const invitation = await this.getInvitationByTokenUseCase.execute(token);
 
     return InvitationPresentationMapper.toResponseWithoutToken(invitation);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Accept an invitation (for existing logged-in users)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Accepted — returns new JWT with organizationId',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Invitation not found or expired' })
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':token/accept')
+  async accept(@Param('token') token: string, @CurrentUser() user: JwtUser) {
+    const membership = await this.acceptInvitationUseCase.execute(
+      user.id,
+      token,
+    );
+    return this.switchOrgUseCase.execute(
+      user.id,
+      user.email,
+      membership.organizationId,
+    );
   }
 }

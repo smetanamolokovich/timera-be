@@ -39,5 +39,7 @@ export class AcceptInvitationUseCase {
 
     await this.membershipRepository.save(membership);
     await this.invitationRepository.markAsUsed(invitation.id, new Date());
+
+    return membership;
   }
 }
