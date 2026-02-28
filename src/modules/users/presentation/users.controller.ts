@@ -21,7 +21,7 @@ import { GetMeUseCase } from '../application/get-me.usecase';
 import { UpdateMeDto } from './dto/update-me.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 
-@ApiTags('users')
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(
