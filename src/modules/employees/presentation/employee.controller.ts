@@ -15,6 +15,8 @@ import { CreateEmployeeUseCase } from '../application/create-employee.usecase';
 import { EmployeePresentationMapper } from './employee.mapper';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 import { GetEmployeesUseCase } from '../application/get-employees.usecase';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -39,6 +41,7 @@ export class EmployeeController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
   @Post()
   async create(
     @CurrentUser() { organizationId }: JwtUser,

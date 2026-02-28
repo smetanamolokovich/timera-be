@@ -21,6 +21,8 @@ import { InvitationResponseDto } from './dto/invitation-response.dto';
 import { InvitationPresentationMapper } from './invitation.mapper';
 import { AccessDeniedError } from '../../../common/errors/access-denied.error';
 import { InvalidEnvVarsError } from '../../../common/errors/invalid-env-vars.error';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 
 @ApiTags('invitations')
 @Controller('invitations')
@@ -40,6 +42,7 @@ export class InvitationController {
     type: InvitationResponseDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(

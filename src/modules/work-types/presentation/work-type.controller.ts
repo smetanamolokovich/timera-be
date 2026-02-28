@@ -18,6 +18,8 @@ import {
   type JwtUser,
 } from '../../../common/decorators/current-user.decorator';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -52,6 +54,7 @@ export class WorkTypeController {
   @ApiBadRequestResponse({
     description: 'Bad Request. Please check the input data.',
   })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
   @Post()
   async createWorkType(
     @CurrentUser() user: JwtUser,
@@ -77,6 +80,7 @@ export class WorkTypeController {
   @ApiBadRequestResponse({
     description: 'Bad Request. Please check the input data.',
   })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
   @Post('bulk')
   async createWorkTypesBulk(
     @CurrentUser() user: JwtUser,

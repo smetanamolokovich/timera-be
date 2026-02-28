@@ -17,6 +17,8 @@ import {
 import { ProjectPresentationMapper } from './project.mapper';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 import { GetProjectsUseCase } from '../application/get-projects.usecase';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('projects')
@@ -41,6 +43,7 @@ export class ProjectController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected error occurred.',
   })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
   @Post()
   async createProject(
     @CurrentUser() user: JwtUser,
