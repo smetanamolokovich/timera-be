@@ -4,6 +4,8 @@ import { EmployeeOrmEntity } from './employee.orm-entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from '../domain/employee';
 import { EmployeeMapper } from './employee.mapper';
+import { PaginatedResponseDto } from '../../../common/dto/paginated-response.dto';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
 export class EmployeeRepositoryImpl implements EmployeeRepository {
   constructor(
@@ -32,9 +34,31 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
     return EmployeeMapper.toDomain(row);
   }
 
-  async findByOrganizationId(organizationId: string): Promise<Employee[]> {
-    const rows = await this.repo.find({ where: { organizationId } });
+  async findByOrganizationId(
+    organizationId: string,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponseDto<Employee>> {
+    const page = paginationQuery.page ?? 1;
+    const limit = paginationQuery.limit ?? 20;
+    const sortBy = paginationQuery.sortBy ?? 'createdAt';
+    const sortOrder = paginationQuery.sortOrder ?? 'DESC';
 
-    return rows.map((row) => EmployeeMapper.toDomain(row));
+    const [rows, total] = await this.repo.findAndCount({
+      where: { organizationId },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { [sortBy]: sortOrder } as Record<string, 'ASC' | 'DESC'>,
+    });
+
+    return {
+      data: rows.map((row) => EmployeeMapper.toDomain(row)),
+      meta: {
+        total,
+        page,
+        limit,
+        nextCursor: rows.length ? rows[rows.length - 1].id : null,
+        hasNextPage: (page - 1) * limit + rows.length < total,
+      },
+    };
   }
 }

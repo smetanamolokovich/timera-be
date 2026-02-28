@@ -4,8 +4,13 @@ import { GetTimeEntriesByProjectUseCase } from '../application/get-time-entries-
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiExtraModels,
+  ApiOperation,
+  ApiQuery,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -14,7 +19,16 @@ import {
 } from '../../../common/decorators/current-user.decorator';
 import { CreateTimeEntryDto } from './dto/create-time-entry.dto';
 import { TimeEntryPresentationMapper } from './time-entry.mapper';
+import { TimeEntryResponseDto } from './dto/time-entry-response.dto';
+import {
+  GetTimeEntriesQueryDto,
+  TimeEntrySortByEnum,
+} from './dto/get-time-entries-query.dto';
+import { SortOrderEnum } from '../../../common/dto/pagination-query.dto';
+import { PaginationMetaDto } from '../../../common/dto/paginated-response.dto';
 
+@ApiTags('Time Entries')
+@ApiExtraModels(PaginationMetaDto, TimeEntryResponseDto)
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('time-entries')
@@ -24,6 +38,7 @@ export class TimeEntryController {
     private readonly getTimeEntriesByProjectUseCase: GetTimeEntriesByProjectUseCase,
   ) {}
 
+  @ApiOperation({ summary: 'Log a new time entry' })
   @ApiResponse({
     status: 201,
     description: 'The time entry has been successfully created.',
@@ -48,27 +63,64 @@ export class TimeEntryController {
     return TimeEntryPresentationMapper.toResponse(timeEntry);
   }
 
+  @ApiOperation({ summary: 'List time entries for a project' })
   @ApiResponse({
     status: 200,
     description: 'The list of time entries has been successfully retrieved.',
+    schema: {
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(TimeEntryResponseDto) },
+        },
+        meta: { $ref: getSchemaPath(PaginationMetaDto) },
+      },
+    },
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
+  @ApiQuery({
+    name: 'projectId',
+    required: true,
+    type: String,
+    description: 'Project ID',
+  })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    example: '2026-01-01',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    example: '2026-01-31',
+  })
+  @ApiQuery({ name: 'sortBy', required: false, enum: TimeEntrySortByEnum })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrderEnum })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({ name: 'cursor', required: false, type: String })
   @Get()
   async getByProject(
     @CurrentUser() user: JwtUser,
-    @Query('projectId') projectId: string,
-    @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string,
+    @Query() query: GetTimeEntriesQueryDto,
   ) {
-    const timeEntries = await this.getTimeEntriesByProjectUseCase.execute(
+    const result = await this.getTimeEntriesByProjectUseCase.execute(
       user.id,
-      projectId,
-      fromDate ? new Date(fromDate) : undefined,
-      toDate ? new Date(toDate) : undefined,
+      query.projectId,
+      query,
+      query.fromDate ? new Date(query.fromDate) : undefined,
+      query.toDate ? new Date(query.toDate) : undefined,
     );
 
-    return TimeEntryPresentationMapper.toResponseList(timeEntries);
+    return {
+      ...result,
+      data: result.data.map((timeEntry) =>
+        TimeEntryPresentationMapper.toResponse(timeEntry),
+      ),
+    };
   }
 }

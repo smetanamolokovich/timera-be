@@ -1,7 +1,8 @@
 import { Employee } from '../domain/employee';
+import { EmployeeResponseDto } from './dto/employee-response.dto';
 
 export class EmployeePresentationMapper {
-  static toResponse(employee: Employee) {
+  static toResponse(employee: Employee): EmployeeResponseDto {
     return {
       id: employee.id,
       organizationId: employee.organizationId,
@@ -11,7 +12,7 @@ export class EmployeePresentationMapper {
     };
   }
 
-  static toResponseList(employees: Employee[]) {
+  static toResponseList(employees: Employee[]): EmployeeResponseDto[] {
     return employees.map((employee) => this.toResponse(employee));
   }
 }

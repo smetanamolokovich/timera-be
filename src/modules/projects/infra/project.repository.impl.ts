@@ -4,6 +4,8 @@ import { ProjectOrmEntity } from '../infra/project.orm-entity';
 import { Project } from '../domain/project';
 import { ProjectMapper } from '../infra/project.mapper';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { PaginatedResponseDto } from '../../../common/dto/paginated-response.dto';
 
 export class ProjectRepositoryImpl implements ProjectRepository {
   constructor(
@@ -24,10 +26,31 @@ export class ProjectRepositoryImpl implements ProjectRepository {
     return ProjectMapper.toDomain(row);
   }
 
-  async findByOrganizationId(organizationId: string): Promise<Project[]> {
-    const rows = await this.projectRepository.find({
+  async findByOrganizationId(
+    organizationId: string,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponseDto<Project>> {
+    const page = paginationQuery.page ?? 1;
+    const limit = paginationQuery.limit ?? 20;
+    const sortBy = paginationQuery.sortBy ?? 'createdAt';
+    const sortOrder = paginationQuery.sortOrder ?? 'DESC';
+
+    const [rows, total] = await this.projectRepository.findAndCount({
       where: { organizationId },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { [sortBy]: sortOrder } as Record<string, 'ASC' | 'DESC'>,
     });
-    return rows.map((row) => ProjectMapper.toDomain(row));
+
+    return {
+      data: rows.map((row) => ProjectMapper.toDomain(row)),
+      meta: {
+        total,
+        page,
+        limit,
+        nextCursor: rows.length ? rows[rows.length - 1].id : null,
+        hasNextPage: (page - 1) * limit + rows.length < total,
+      },
+    };
   }
 }

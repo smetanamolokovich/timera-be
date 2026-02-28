@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { WorkType } from '../domain/work-type';
 import { WorkTypeOrmEntity } from './work-type.orm-entity';
 import { WorkTypeMapper } from './work-type.mapper';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { PaginatedResponseDto } from '../../../common/dto/paginated-response.dto';
 
 export class WorkTypeRepositoryImpl implements WorkTypeRepository {
   constructor(
@@ -36,9 +38,31 @@ export class WorkTypeRepositoryImpl implements WorkTypeRepository {
     return WorkTypeMapper.toDomain(row);
   }
 
-  async findByProjectId(projectId: string): Promise<WorkType[]> {
-    const rows = await this.repository.find({ where: { projectId } });
+  async findByProjectId(
+    projectId: string,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponseDto<WorkType>> {
+    const page = paginationQuery.page ?? 1;
+    const limit = paginationQuery.limit ?? 20;
+    const sortBy = paginationQuery.sortBy ?? 'createdAt';
+    const sortOrder = paginationQuery.sortOrder ?? 'DESC';
 
-    return rows.map((row) => WorkTypeMapper.toDomain(row));
+    const [rows, total] = await this.repository.findAndCount({
+      where: { projectId },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { [sortBy]: sortOrder } as Record<string, 'ASC' | 'DESC'>,
+    });
+
+    return {
+      data: rows.map((row) => WorkTypeMapper.toDomain(row)),
+      meta: {
+        total,
+        page,
+        limit,
+        nextCursor: rows.length ? rows[rows.length - 1].id : null,
+        hasNextPage: (page - 1) * limit + rows.length < total,
+      },
+    };
   }
 }

@@ -10,6 +10,8 @@ import {
   MoreThanOrEqual,
   LessThanOrEqual,
 } from 'typeorm';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { PaginatedResponseDto } from '../../../common/dto/paginated-response.dto';
 
 export class TimeEntryRepositoryImpl implements TimeEntryRepository {
   constructor(
@@ -39,9 +41,14 @@ export class TimeEntryRepositoryImpl implements TimeEntryRepository {
 
   async findByProjectId(
     projectId: string,
+    paginationQuery: PaginationQueryDto,
     fromDate?: Date,
     toDate?: Date,
-  ): Promise<TimeEntry[]> {
+  ): Promise<PaginatedResponseDto<TimeEntry>> {
+    const page = paginationQuery.page ?? 1;
+    const limit = paginationQuery.limit ?? 20;
+    const sortBy = paginationQuery.sortBy ?? 'date';
+    const sortOrder = paginationQuery.sortOrder ?? 'DESC';
     const where: FindOptionsWhere<TimeEntryOrmEntity> = { projectId };
 
     if (fromDate && toDate) {
@@ -52,9 +59,23 @@ export class TimeEntryRepositoryImpl implements TimeEntryRepository {
       where.date = LessThanOrEqual(toDate);
     }
 
-    const rows = await this.repository.find({ where, order: { date: 'DESC' } });
+    const [rows, total] = await this.repository.findAndCount({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { [sortBy]: sortOrder } as Record<string, 'ASC' | 'DESC'>,
+    });
 
-    return rows.map((row) => TimeEntryMapper.toDomain(row));
+    return {
+      data: rows.map((row) => TimeEntryMapper.toDomain(row)),
+      meta: {
+        total,
+        page,
+        limit,
+        nextCursor: rows.length ? rows[rows.length - 1].id : null,
+        hasNextPage: (page - 1) * limit + rows.length < total,
+      },
+    };
   }
 
   async findByWorkTypeId(workTypeId: string): Promise<TimeEntry[]> {

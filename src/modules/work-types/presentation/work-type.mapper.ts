@@ -1,13 +1,8 @@
 import { WorkType } from '../domain/work-type';
-
-export interface WorkTypeResponse {
-  id: string;
-  projectId: string;
-  name: string;
-}
+import { WorkTypeResponseDto } from './dto/work-type-response.dto';
 
 export class WorkTypePresentationMapper {
-  static toResponse(workType: WorkType): WorkTypeResponse {
+  static toResponse(workType: WorkType): WorkTypeResponseDto {
     return {
       id: workType.id,
       projectId: workType.projectId,
@@ -15,7 +10,7 @@ export class WorkTypePresentationMapper {
     };
   }
 
-  static toResponseList(workTypes: WorkType[]): WorkTypeResponse[] {
+  static toResponseList(workTypes: WorkType[]): WorkTypeResponseDto[] {
     return workTypes.map((workType) => this.toResponse(workType));
   }
 }
