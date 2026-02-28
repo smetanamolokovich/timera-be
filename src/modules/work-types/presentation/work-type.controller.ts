@@ -64,7 +64,14 @@ export class WorkTypeController {
     @Param('projectId') projectId: string,
     @Query() pagination: PaginationQueryDto,
   ) {
-    return this.getWorkTypesUseCase.execute(projectId, pagination);
+    const result = await this.getWorkTypesUseCase.execute(projectId, pagination);
+
+    const { data, ...paginationMeta } = result;
+
+    return {
+      ...paginationMeta,
+      data: data.map((workType) => WorkTypePresentationMapper.toResponse(workType)),
+    };
   }
 
   @ApiOperation({ summary: 'Create a work type' })
