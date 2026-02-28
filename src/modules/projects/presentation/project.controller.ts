@@ -87,6 +87,16 @@ export class ProjectController {
   ) {
     if (!user.organizationId) throw new OrganizationIdRequiredError();
 
-    return this.getProjectsUseCase.execute(user.organizationId, pagination);
+    const result = await this.getProjectsUseCase.execute(
+      user.organizationId,
+      pagination,
+    );
+
+    return {
+      ...result,
+      data: result.data.map((project) =>
+        ProjectPresentationMapper.toResponse(project),
+      ),
+    };
   }
 }
