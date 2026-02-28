@@ -11,6 +11,8 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { WorkTypesModule } from './modules/work-types/work-types.module';
 import { TimeEntriesModule } from './modules/time-entries/time-entries.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
   imports: [
@@ -29,5 +31,6 @@ import { InvitationsModule } from './modules/invitations/invitations.module';
     TimeEntriesModule,
     InvitationsModule,
   ],
+  providers: [RolesGuard],
 })
 export class AppModule {}

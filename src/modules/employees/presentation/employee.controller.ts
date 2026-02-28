@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiResponse,
   ApiUnauthorizedResponse,
@@ -15,6 +16,9 @@ import { CreateEmployeeUseCase } from '../application/create-employee.usecase';
 import { EmployeePresentationMapper } from './employee.mapper';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 import { GetEmployeesUseCase } from '../application/get-employees.usecase';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { OrganizationRoleEnum } from '../../memberships/domain/membership';
+import { RolesGuard } from '../../../common/guards/roles.guard';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -39,6 +43,11 @@ export class EmployeeController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Please provide a valid JWT token.',
   })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
   @Post()
   async create(
     @CurrentUser() { organizationId }: JwtUser,
