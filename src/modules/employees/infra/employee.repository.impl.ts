@@ -39,7 +39,7 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
     paginationQuery: PaginationQueryDto,
   ): Promise<PaginatedResponseDto<Employee>> {
     const page = paginationQuery.page ?? 1;
-    const limit = paginationQuery.limit ?? 10;
+    const limit = paginationQuery.limit ?? 20;
 
     const [rows, total] = await this.repo.findAndCount({
       where: { organizationId },
