@@ -11,6 +11,7 @@ import { AcceptInvitationUseCase } from './application/accept-invitation.usecase
 import { SwitchOrgUseCase } from '../auth/application/switch-org.usecase';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
 import { InvitationRepositoryImpl } from './infra/invitation.repository.impl';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { InvitationRepositoryImpl } from './infra/invitation.repository.impl';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    EmailModule,
   ],
   controllers: [InvitationController],
   providers: [

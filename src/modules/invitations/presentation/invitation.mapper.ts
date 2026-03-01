@@ -9,7 +9,7 @@ export class InvitationPresentationMapper {
       token: invitation.token,
       expiresAt: invitation.expiresAt,
       invitedEmail: invitation.invitedEmail,
-      inviteUrl: `${process.env.APP_URL}/invitations/accept?token=${invitation.token}`,
+      inviteUrl: `${process.env.FRONTEND_URL}/invitations/accept?token=${invitation.token}`,
     };
   }
 
