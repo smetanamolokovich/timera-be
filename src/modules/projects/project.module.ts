@@ -8,6 +8,7 @@ import { ProjectRepositoryImpl } from './infra/project.repository.impl';
 import { EmployeesModule } from '../employees/employees.module';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
 import { GetProjectsUseCase } from './application/get-projects.usecase';
+import { GetProjectByIdUseCase } from './application/get-project-by-id.usecase';
 @Module({
   imports: [EmployeesModule, TypeOrmModule.forFeature([ProjectOrmEntity])],
   controllers: [ProjectController],
@@ -15,6 +16,7 @@ import { GetProjectsUseCase } from './application/get-projects.usecase';
     CreateProjectUseCase,
     GetProjectsUseCase,
     UpdateProjectUseCase,
+    GetProjectByIdUseCase,
     {
       provide: REPOSITORY_TOKENS.ProjectRepository,
       useClass: ProjectRepositoryImpl,

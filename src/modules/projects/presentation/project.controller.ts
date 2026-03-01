@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { CreateProjectUseCase } from '../application/create-project.usecase';
 import { UpdateProjectUseCase } from '../application/update-project.usecase';
+import { GetProjectByIdUseCase } from '../application/get-project-by-id.usecase';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -55,6 +56,7 @@ export class ProjectController {
     private readonly createProjectUseCase: CreateProjectUseCase,
     private readonly getProjectsUseCase: GetProjectsUseCase,
     private readonly updateProjectUseCase: UpdateProjectUseCase,
+    private readonly getProjectByIdUseCase: GetProjectByIdUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Create a new project' })
@@ -162,6 +164,26 @@ export class ProjectController {
       id,
       dto,
     );
+
+    return ProjectPresentationMapper.toResponse(project);
+  }
+
+  @ApiOperation({ summary: 'Get a project by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'The project has been successfully retrieved.',
+    type: ProjectResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Project not found.',
+  })
+  @Get(':id')
+  async getProjectById(@Param('id') id: string) {
+    const project = await this.getProjectByIdUseCase.execute(id);
 
     return ProjectPresentationMapper.toResponse(project);
   }

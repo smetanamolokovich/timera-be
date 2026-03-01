@@ -7,7 +7,12 @@ import type { OrganizationRepository } from '../domain/interfaces/organization.i
 describe('GetCurrentOrganizationUseCase', () => {
   const save = jest.fn<Promise<void>, [Organization]>();
   const findById = jest.fn<Promise<Organization | null>, [string]>();
-  const mockOrganizationRepository: OrganizationRepository = { save, findById };
+  const update = jest.fn<Promise<void>, [Organization]>();
+  const mockOrganizationRepository: OrganizationRepository = {
+    save,
+    findById,
+    update,
+  };
 
   const useCase = new GetCurrentOrganizationUseCase(mockOrganizationRepository);
 
