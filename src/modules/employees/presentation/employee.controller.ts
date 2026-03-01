@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
@@ -17,7 +26,9 @@ import {
   type JwtUser,
 } from '../../../common/decorators/current-user.decorator';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { CreateEmployeeUseCase } from '../application/create-employee.usecase';
+import { UpdateEmployeeUseCase } from '../application/update-employee.usecase';
 import { EmployeePresentationMapper } from './employee.mapper';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
@@ -41,6 +52,7 @@ export class EmployeeController {
   constructor(
     private readonly createEmployeeUseCase: CreateEmployeeUseCase,
     private readonly getEmployeesUseCase: GetEmployeesUseCase,
+    private readonly updateEmployeeUseCase: UpdateEmployeeUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Create an employee' })
@@ -121,5 +133,50 @@ export class EmployeeController {
         EmployeePresentationMapper.toResponse(row),
       ),
     };
+  }
+
+  @ApiOperation({ summary: 'Update an employee' })
+  @ApiResponse({
+    status: 200,
+    description: 'The employee has been successfully updated.',
+    type: EmployeeResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Employee not found.',
+  })
+  @ApiResponse({
+    status: 422,
+    description: 'Unprocessable Entity',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected error occurred.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
+  @Patch(':id')
+  async update(
+    @CurrentUser() { organizationId }: JwtUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateEmployeeDto,
+  ) {
+    if (!organizationId) {
+      throw new OrganizationIdRequiredError();
+    }
+
+    const employee = await this.updateEmployeeUseCase.execute(
+      organizationId,
+      id,
+      dto.name,
+      dto.hourlyRate,
+    );
+
+    return EmployeePresentationMapper.toResponse(employee);
   }
 }
