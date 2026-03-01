@@ -1,10 +1,21 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiExtraModels,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -18,6 +29,7 @@ import {
 } from '../../../common/decorators/current-user.decorator';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { CreateEmployeeUseCase } from '../application/create-employee.usecase';
+import { DeleteEmployeeUseCase } from '../application/delete-employee.usecase';
 import { EmployeePresentationMapper } from './employee.mapper';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
@@ -41,6 +53,7 @@ export class EmployeeController {
   constructor(
     private readonly createEmployeeUseCase: CreateEmployeeUseCase,
     private readonly getEmployeesUseCase: GetEmployeesUseCase,
+    private readonly deleteEmployeeUseCase: DeleteEmployeeUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Create an employee' })
@@ -121,5 +134,27 @@ export class EmployeeController {
         EmployeePresentationMapper.toResponse(row),
       ),
     };
+  }
+
+  @ApiOperation({ summary: 'Delete an employee by ID' })
+  @ApiResponse({
+    status: 204,
+    description: 'The employee has been successfully deleted.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Employee not found.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
+  @HttpCode(204)
+  @Delete(':id')
+  async delete(@Param('id') id: string): Promise<void> {
+    await this.deleteEmployeeUseCase.execute(id);
   }
 }

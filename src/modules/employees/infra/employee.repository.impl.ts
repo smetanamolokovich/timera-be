@@ -34,6 +34,10 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
     return EmployeeMapper.toDomain(row);
   }
 
+  async deleteById(id: string): Promise<void> {
+    await this.repo.delete({ id });
+  }
+
   async findByOrganizationId(
     organizationId: string,
     paginationQuery: PaginationQueryDto,
