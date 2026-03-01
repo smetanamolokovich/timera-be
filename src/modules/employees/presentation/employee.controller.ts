@@ -1,11 +1,21 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiExtraModels,
+  ApiNotFoundResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -22,6 +32,7 @@ import { EmployeePresentationMapper } from './employee.mapper';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 import { GetEmployeesUseCase } from '../application/get-employees.usecase';
+import { GetEmployeeByIdUseCase } from '../application/get-employee-by-id.usecase';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
@@ -41,6 +52,7 @@ export class EmployeeController {
   constructor(
     private readonly createEmployeeUseCase: CreateEmployeeUseCase,
     private readonly getEmployeesUseCase: GetEmployeesUseCase,
+    private readonly getEmployeeByIdUseCase: GetEmployeeByIdUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Create an employee' })
@@ -121,5 +133,24 @@ export class EmployeeController {
         EmployeePresentationMapper.toResponse(row),
       ),
     };
+  }
+
+  @ApiOperation({ summary: 'Get an employee by id' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'The employee has been successfully retrieved.',
+    type: EmployeeResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Employee not found.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @Get(':id')
+  async getById(@Param('id') id: string) {
+    const employee = await this.getEmployeeByIdUseCase.execute(id);
+    return EmployeePresentationMapper.toResponse(employee);
   }
 }
