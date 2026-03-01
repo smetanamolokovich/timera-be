@@ -1,6 +1,17 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateProjectUseCase } from '../application/create-project.usecase';
+import { UpdateProjectUseCase } from '../application/update-project.usecase';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import { AuthGuard } from '@nestjs/passport';
 import {
   CurrentUser,
@@ -12,6 +23,7 @@ import {
   ApiForbiddenResponse,
   ApiExtraModels,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -42,6 +54,7 @@ export class ProjectController {
   constructor(
     private readonly createProjectUseCase: CreateProjectUseCase,
     private readonly getProjectsUseCase: GetProjectsUseCase,
+    private readonly updateProjectUseCase: UpdateProjectUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Create a new project' })
@@ -118,5 +131,38 @@ export class ProjectController {
         ProjectPresentationMapper.toResponse(project),
       ),
     };
+  }
+
+  @ApiOperation({ summary: 'Update a project by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'The project has been successfully updated.',
+    type: ProjectResponseDto,
+  })
+  @ApiBadRequestResponse({ description: 'Invalid input data.' })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
+  @ApiNotFoundResponse({ description: 'Project not found.' })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
+  @Patch(':id')
+  async updateProject(
+    @CurrentUser() user: JwtUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateProjectDto,
+  ) {
+    if (!user.organizationId) throw new OrganizationIdRequiredError();
+
+    const project = await this.updateProjectUseCase.execute(
+      user.organizationId,
+      id,
+      dto,
+    );
+
+    return ProjectPresentationMapper.toResponse(project);
   }
 }
