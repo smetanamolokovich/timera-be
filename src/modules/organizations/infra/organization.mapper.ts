@@ -14,6 +14,7 @@ export class OrganizationMapper {
     orm.email = domain.email ?? null;
     orm.logoUrl = domain.logoUrl ?? null;
     orm.isActive = domain.isActive;
+    orm.timezone = domain.timezone ?? null;
 
     return orm;
   }
@@ -30,6 +31,7 @@ export class OrganizationMapper {
       raw.email ?? undefined,
       raw.logoUrl ?? undefined,
       raw.isActive,
+      raw.timezone ?? undefined,
     );
   }
 
@@ -45,6 +47,7 @@ export class OrganizationMapper {
     orm.email = domain.email ?? null;
     orm.logoUrl = domain.logoUrl ?? null;
     orm.isActive = domain.isActive;
+    orm.timezone = domain.timezone ?? null;
 
     return orm;
   }
