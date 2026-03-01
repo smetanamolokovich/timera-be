@@ -12,4 +12,5 @@ export const REPOSITORY_TOKENS = {
 
 export const SERVICE_TOKENS = {
   PasswordHasher: Symbol('PasswordHasher'),
+  EmailService: Symbol('EmailService'),
 } as const;

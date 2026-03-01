@@ -56,7 +56,8 @@ export class InvitationController {
   ): Promise<InvitationResponseDto> {
     if (!user.organizationId || !user.id) throw new AccessDeniedError();
 
-    if (!process.env.APP_URL) throw new InvalidEnvVarsError(['APP_URL']);
+    if (!process.env.FRONTEND_URL)
+      throw new InvalidEnvVarsError(['FRONTEND_URL']);
 
     const invitation = await this.createInvitationUseCase.execute(
       user.organizationId,
