@@ -12,6 +12,7 @@ export class Organization {
     public readonly email?: string,
     public readonly logoUrl?: string,
     public readonly isActive: boolean = true,
+    public readonly timezone?: string,
   ) {
     if (!name || name.length < 2 || name.length > 100) {
       throw new InvalidOrganizationNameError();

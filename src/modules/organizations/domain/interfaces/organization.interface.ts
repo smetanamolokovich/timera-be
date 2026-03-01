@@ -3,4 +3,5 @@ import { Organization } from '../organization';
 export interface OrganizationRepository {
   save(organization: Organization): Promise<void>;
   findById(id: string): Promise<Organization | null>;
+  update(organization: Organization): Promise<void>;
 }

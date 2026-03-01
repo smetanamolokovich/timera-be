@@ -11,6 +11,7 @@ export class OrganizationPresentationMapper {
       phoneNumber: organization.phoneNumber,
       email: organization.email,
       logoUrl: organization.logoUrl,
+      timezone: organization.timezone,
       isActive: organization.isActive,
       createdAt: organization.createdAt,
       updatedAt: organization.updatedAt,

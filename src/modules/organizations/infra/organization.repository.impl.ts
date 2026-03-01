@@ -19,6 +19,11 @@ export class OrganizationRepositoryImpl implements OrganizationRepository {
     await this.organizationRepository.save(orm);
   }
 
+  async update(organization: Organization): Promise<void> {
+    const orm = OrganizationMapper.fromDomain(organization);
+    await this.organizationRepository.save(orm);
+  }
+
   async findById(id: string): Promise<Organization | null> {
     const orm = await this.organizationRepository.findOne({ where: { id } });
     if (!orm) return null;

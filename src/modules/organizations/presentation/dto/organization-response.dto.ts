@@ -45,6 +45,13 @@ export class OrganizationResponseDto {
   logoUrl?: string;
 
   @ApiProperty({
+    example: 'America/New_York',
+    description: 'Organization timezone',
+    required: false,
+  })
+  timezone?: string;
+
+  @ApiProperty({
     example: true,
     description: 'Whether the organization is active',
   })

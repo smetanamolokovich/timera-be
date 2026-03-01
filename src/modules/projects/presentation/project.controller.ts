@@ -6,12 +6,16 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { CreateProjectUseCase } from '../application/create-project.usecase';
+import { UpdateProjectUseCase } from '../application/update-project.usecase';
+import { GetProjectByIdUseCase } from '../application/get-project-by-id.usecase';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import { AuthGuard } from '@nestjs/passport';
 import {
   CurrentUser,
@@ -56,6 +60,8 @@ export class ProjectController {
     private readonly createProjectUseCase: CreateProjectUseCase,
     private readonly getProjectsUseCase: GetProjectsUseCase,
     private readonly deleteProjectUseCase: DeleteProjectUseCase,
+    private readonly updateProjectUseCase: UpdateProjectUseCase,
+    private readonly getProjectByIdUseCase: GetProjectByIdUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Create a new project' })
@@ -159,5 +165,58 @@ export class ProjectController {
     if (!user.organizationId) throw new OrganizationIdRequiredError();
 
     await this.deleteProjectUseCase.execute(id, user.organizationId);
+  }
+
+  @ApiOperation({ summary: 'Update a project by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'The project has been successfully updated.',
+    type: ProjectResponseDto,
+  })
+  @ApiBadRequestResponse({ description: 'Invalid input data.' })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
+  @ApiNotFoundResponse({ description: 'Project not found.' })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
+  @Patch(':id')
+  async updateProject(
+    @CurrentUser() user: JwtUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateProjectDto,
+  ) {
+    if (!user.organizationId) throw new OrganizationIdRequiredError();
+
+    const project = await this.updateProjectUseCase.execute(
+      user.organizationId,
+      id,
+      dto,
+    );
+
+    return ProjectPresentationMapper.toResponse(project);
+  }
+
+  @ApiOperation({ summary: 'Get a project by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'The project has been successfully retrieved.',
+    type: ProjectResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Project not found.',
+  })
+  @Get(':id')
+  async getProjectById(@Param('id') id: string) {
+    const project = await this.getProjectByIdUseCase.execute(id);
+
+    return ProjectPresentationMapper.toResponse(project);
   }
 }
