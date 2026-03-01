@@ -26,6 +26,10 @@ export class ProjectRepositoryImpl implements ProjectRepository {
     return ProjectMapper.toDomain(row);
   }
 
+  async delete(id: string): Promise<void> {
+    await this.projectRepository.delete(id);
+  }
+
   async findByOrganizationId(
     organizationId: string,
     paginationQuery: PaginationQueryDto,

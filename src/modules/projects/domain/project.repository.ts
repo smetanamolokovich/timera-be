@@ -9,4 +9,5 @@ export interface ProjectRepository {
     organizationId: string,
     paginationQuery: PaginationQueryDto,
   ): Promise<PaginatedResponseDto<Project>>;
+  delete(id: string): Promise<void>;
 }

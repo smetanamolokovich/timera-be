@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateProjectUseCase } from '../application/create-project.usecase';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -12,6 +23,7 @@ import {
   ApiForbiddenResponse,
   ApiExtraModels,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -23,6 +35,7 @@ import { ProjectPresentationMapper } from './project.mapper';
 import { ProjectResponseDto } from './dto/project-response.dto';
 import { OrganizationIdRequiredError } from '../../../common/errors/organization-id-required.error';
 import { GetProjectsUseCase } from '../application/get-projects.usecase';
+import { DeleteProjectUseCase } from '../application/delete-project.usecase';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { OrganizationRoleEnum } from '../../memberships/domain/membership';
 import { RolesGuard } from '../../../common/guards/roles.guard';
@@ -42,6 +55,7 @@ export class ProjectController {
   constructor(
     private readonly createProjectUseCase: CreateProjectUseCase,
     private readonly getProjectsUseCase: GetProjectsUseCase,
+    private readonly deleteProjectUseCase: DeleteProjectUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Create a new project' })
@@ -118,5 +132,32 @@ export class ProjectController {
         ProjectPresentationMapper.toResponse(project),
       ),
     };
+  }
+
+  @ApiOperation({ summary: 'Delete a project' })
+  @ApiResponse({
+    status: 204,
+    description: 'The project has been successfully deleted.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Project not found.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. Required role: OWNER or MANAGER.',
+  })
+  @Roles(OrganizationRoleEnum.OWNER, OrganizationRoleEnum.MANAGER)
+  @UseGuards(RolesGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  async deleteProject(
+    @CurrentUser() user: JwtUser,
+    @Param('id') id: string,
+  ): Promise<void> {
+    if (!user.organizationId) throw new OrganizationIdRequiredError();
+
+    await this.deleteProjectUseCase.execute(id, user.organizationId);
   }
 }

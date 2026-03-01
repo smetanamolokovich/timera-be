@@ -7,12 +7,14 @@ import { ProjectRepositoryImpl } from './infra/project.repository.impl';
 import { EmployeesModule } from '../employees/employees.module';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
 import { GetProjectsUseCase } from './application/get-projects.usecase';
+import { DeleteProjectUseCase } from './application/delete-project.usecase';
 @Module({
   imports: [EmployeesModule, TypeOrmModule.forFeature([ProjectOrmEntity])],
   controllers: [ProjectController],
   providers: [
     CreateProjectUseCase,
     GetProjectsUseCase,
+    DeleteProjectUseCase,
     {
       provide: REPOSITORY_TOKENS.ProjectRepository,
       useClass: ProjectRepositoryImpl,
