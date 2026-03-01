@@ -57,4 +57,7 @@ export class OrganizationOrmEntity {
 
   @Column({ default: true })
   isActive!: boolean;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  timezone?: string | null;
 }
