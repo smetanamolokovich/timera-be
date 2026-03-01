@@ -5,18 +5,23 @@ import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class NodemailerEmailService implements EmailService {
-  private readonly transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null = null;
 
-  constructor(private readonly configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.getOrThrow<string>('SMTP_HOST'),
-      port: Number(this.configService.getOrThrow<string>('SMTP_PORT')),
-      secure: this.configService.get('SMTP_SECURE') === 'true',
-      auth: {
-        user: this.configService.getOrThrow<string>('SMTP_USER'),
-        pass: this.configService.getOrThrow<string>('SMTP_PASS'),
-      },
-    });
+  constructor(private readonly configService: ConfigService) {}
+
+  private getTransporter(): nodemailer.Transporter {
+    if (!this.transporter) {
+      this.transporter = nodemailer.createTransport({
+        host: this.configService.getOrThrow<string>('SMTP_HOST'),
+        port: Number(this.configService.getOrThrow<string>('SMTP_PORT')),
+        secure: this.configService.get('SMTP_SECURE') === 'true',
+        auth: {
+          user: this.configService.getOrThrow<string>('SMTP_USER'),
+          pass: this.configService.getOrThrow<string>('SMTP_PASS'),
+        },
+      });
+    }
+    return this.transporter;
   }
 
   async sendInvitation(
@@ -29,7 +34,7 @@ export class NodemailerEmailService implements EmailService {
     const text = `You have been invited to join Timera as a ${role}. Click the link below to accept the invitation:\n\n${inviteUrl}`;
     const html = `<p>You have been invited to join Timera as a <strong>${role}</strong>.</p><p>Click the link below to accept the invitation:</p><p><a href="${inviteUrl}">${inviteUrl}</a></p>`;
 
-    await this.transporter.sendMail({
+    await this.getTransporter().sendMail({
       from,
       to,
       subject,
