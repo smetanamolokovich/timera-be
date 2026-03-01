@@ -7,10 +7,12 @@ describe('GetProjectByIdUseCase', () => {
   const save = jest.fn<Promise<void>, [Project]>();
   const findById = jest.fn<Promise<Project | null>, [string]>();
   const findByOrganizationId = jest.fn();
+  const delete_ = jest.fn<Promise<void>, [string]>();
   const mockProjectRepository: ProjectRepository = {
     save,
     findById,
     findByOrganizationId,
+    delete: delete_,
   };
 
   const useCase = new GetProjectByIdUseCase(mockProjectRepository);
