@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmployeeOrmEntity } from './infra/employee.orm-entity';
 import { CreateEmployeeUseCase } from './application/create-employee.usecase';
+import { DeleteEmployeeUseCase } from './application/delete-employee.usecase';
 import { EmployeeRepositoryImpl } from './infra/employee.repository.impl';
 import { EmployeeController } from './presentation/employee.controller';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
@@ -11,6 +12,7 @@ import { GetEmployeesUseCase } from './application/get-employees.usecase';
   imports: [TypeOrmModule.forFeature([EmployeeOrmEntity])],
   providers: [
     CreateEmployeeUseCase,
+    DeleteEmployeeUseCase,
     GetEmployeesUseCase,
     {
       provide: REPOSITORY_TOKENS.EmployeeRepository,

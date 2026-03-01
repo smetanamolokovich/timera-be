@@ -10,4 +10,5 @@ export interface EmployeeRepository {
     organizationId: string,
     paginationQuery: PaginationQueryDto,
   ): Promise<PaginatedResponseDto<Employee>>;
+  deleteById(id: string): Promise<void>;
 }
