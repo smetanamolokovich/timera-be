@@ -27,7 +27,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Login user and get JWT token' })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'The user has been successfully logged in.',
   })
   @ApiResponse({
