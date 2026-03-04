@@ -16,15 +16,11 @@ export class DeleteTimeEntryUseCase {
   async execute(userId: string, timeEntryId: string): Promise<void> {
     const timeEntry = await this.timeEntryRepository.findById(timeEntryId);
 
-    if (!timeEntry) {
-      throw new TimeEntryNotFoundError();
-    }
+    if (!timeEntry) throw new TimeEntryNotFoundError();
 
     const employee = await this.employeeRepository.findByUserId(userId);
 
-    if (!employee || employee.id !== timeEntry.employeeId) {
-      throw new AccessDeniedError();
-    }
+    if (!employee || employee.id !== timeEntry.employeeId) throw new AccessDeniedError();
 
     await this.timeEntryRepository.delete(timeEntryId);
   }
