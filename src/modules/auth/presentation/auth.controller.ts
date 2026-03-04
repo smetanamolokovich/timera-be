@@ -1,7 +1,15 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { LoginUserUseCase } from '../application/login-user.usecase';
 import { SwitchOrgUseCase } from '../application/switch-org.usecase';
 import { RefreshTokenUseCase } from '../application/refresh-token.usecase';
+import { LogoutUseCase } from '../application/logout.usecase';
 import { LoginDto } from './dto/login.dto';
 import { SwitchOrgDto } from './dto/sign-org.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -26,6 +34,7 @@ export class AuthController {
     private loginUserUseCase: LoginUserUseCase,
     private switchOrgUseCase: SwitchOrgUseCase,
     private refreshTokenUseCase: RefreshTokenUseCase,
+    private logoutUseCase: LogoutUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Login user and get JWT token' })
@@ -56,6 +65,20 @@ export class AuthController {
   @Post('refresh')
   async refresh(@Body() dto: RefreshTokenDto) {
     return this.refreshTokenUseCase.execute(dto.refreshToken);
+  }
+
+  @ApiOperation({ summary: 'Logout user and invalidate refresh token' })
+  @ApiResponse({
+    status: 204,
+    description: 'The user has been successfully logged out.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or expired refresh token.',
+  })
+  @HttpCode(204)
+  @Post('logout')
+  async logout(@Body() dto: RefreshTokenDto): Promise<void> {
+    return this.logoutUseCase.execute(dto.refreshToken);
   }
 
   @ApiBearerAuth()

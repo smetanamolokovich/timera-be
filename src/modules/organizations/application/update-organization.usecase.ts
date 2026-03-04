@@ -22,8 +22,7 @@ export class UpdateOrganizationUseCase {
       throw new OrganizationIdRequiredError();
     }
 
-    const existing =
-      await this.organizationRepository.findById(organizationId);
+    const existing = await this.organizationRepository.findById(organizationId);
 
     if (!existing) {
       throw new NotFoundError(

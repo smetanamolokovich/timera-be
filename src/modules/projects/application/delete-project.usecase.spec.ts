@@ -57,9 +57,9 @@ describe('DeleteProjectUseCase', () => {
     );
     findById.mockResolvedValue(project);
 
-    await expect(
-      useCase.execute('project-id', 'org-id'),
-    ).rejects.toThrow(OrganizationAccessDeniedError);
+    await expect(useCase.execute('project-id', 'org-id')).rejects.toThrow(
+      OrganizationAccessDeniedError,
+    );
     expect(deleteFn).not.toHaveBeenCalled();
   });
 });
