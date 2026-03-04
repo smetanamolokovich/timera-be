@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { InvitationOrmEntity } from './infra/invitation.orm-entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
@@ -12,6 +12,8 @@ import { SwitchOrgUseCase } from '../auth/application/switch-org.usecase';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
 import { InvitationRepositoryImpl } from './infra/invitation.repository.impl';
 import { EmailModule } from '../email/email.module';
+import { EmployeesModule } from '../employees/employees.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { EmailModule } from '../email/email.module';
       }),
     }),
     EmailModule,
+    EmployeesModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [InvitationController],
   providers: [

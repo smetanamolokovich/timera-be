@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RegisterUserUseCase } from './application/register-user.usecase';
 import { GetMeUseCase } from './application/get-me.usecase';
@@ -11,7 +11,7 @@ import { REPOSITORY_TOKENS, SERVICE_TOKENS } from '../../common/tokens';
 import { InvitationsModule } from '../invitations/invitations.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserOrmEntity]), InvitationsModule],
+  imports: [TypeOrmModule.forFeature([UserOrmEntity]), forwardRef(() => InvitationsModule)],
   controllers: [UsersController],
   providers: [
     RegisterUserUseCase,

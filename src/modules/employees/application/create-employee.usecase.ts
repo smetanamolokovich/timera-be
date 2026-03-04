@@ -14,10 +14,12 @@ export class CreateEmployeeUseCase {
     organizationId: string,
     name: string,
     hourlyRate?: number,
+    userId?: string,
   ): Promise<Employee> {
     const employee = new Employee(
       randomUUID(),
       organizationId,
+      userId ?? null,
       name,
       hourlyRate ?? null,
       new Date(),

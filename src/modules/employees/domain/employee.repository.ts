@@ -6,6 +6,10 @@ export interface EmployeeRepository {
   save(employee: Employee): Promise<void>;
   findById(id: string): Promise<Employee | null>;
   findByUserId(userId: string): Promise<Employee | null>;
+  findByUserIdAndOrganizationId(
+    userId: string,
+    organizationId: string,
+  ): Promise<Employee | null>;
   findByOrganizationId(
     organizationId: string,
     paginationQuery: PaginationQueryDto,

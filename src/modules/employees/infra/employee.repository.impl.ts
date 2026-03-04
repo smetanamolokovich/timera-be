@@ -34,6 +34,17 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
     return EmployeeMapper.toDomain(row);
   }
 
+  async findByUserIdAndOrganizationId(
+    userId: string,
+    organizationId: string,
+  ): Promise<Employee | null> {
+    const row = await this.repo.findOne({ where: { userId, organizationId } });
+
+    if (!row) return null;
+
+    return EmployeeMapper.toDomain(row);
+  }
+
   async findByOrganizationId(
     organizationId: string,
     paginationQuery: PaginationQueryDto,

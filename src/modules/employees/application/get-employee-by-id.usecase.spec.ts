@@ -7,11 +7,16 @@ describe('GetEmployeeByIdUseCase', () => {
   const save = jest.fn<Promise<void>, [Employee]>();
   const findById = jest.fn<Promise<Employee | null>, [string]>();
   const findByUserId = jest.fn<Promise<Employee | null>, [string]>();
+  const findByUserIdAndOrganizationId = jest.fn<
+    Promise<Employee | null>,
+    [string, string]
+  >();
   const findByOrganizationId = jest.fn();
   const mockEmployeeRepository: EmployeeRepository = {
     save,
     findById,
     findByUserId,
+    findByUserIdAndOrganizationId,
     findByOrganizationId,
   };
 
@@ -25,6 +30,7 @@ describe('GetEmployeeByIdUseCase', () => {
     const employee = new Employee(
       'emp-id',
       'org-id',
+      null,
       'Jane Smith',
       50,
       new Date(),
