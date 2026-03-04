@@ -1,5 +1,14 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { GetWorkTypesUseCase } from '../application/get-work-types.usecase';
+import { GetWorkTypeByIdUseCase } from '../application/get-work-type-by-id.usecase';
 import { CreateWorkTypeUseCase } from '../application/create-work-type.usecase';
 import { CreateWorkTypesBulkUseCase } from '../application/create-work-types-bulk.usecase';
 import { AuthGuard } from '@nestjs/passport';
@@ -9,6 +18,7 @@ import {
   ApiCreatedResponse,
   ApiExtraModels,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -45,6 +55,7 @@ export class WorkTypeController {
     private readonly createWorkTypeUseCase: CreateWorkTypeUseCase,
     private readonly createWorkTypesBulkUseCase: CreateWorkTypesBulkUseCase,
     private readonly getWorkTypesUseCase: GetWorkTypesUseCase,
+    private readonly getWorkTypeByIdUseCase: GetWorkTypeByIdUseCase,
   ) {}
 
   @ApiOperation({ summary: 'List work types for a project' })
@@ -90,6 +101,25 @@ export class WorkTypeController {
         WorkTypePresentationMapper.toResponse(workType),
       ),
     };
+  }
+
+  @ApiOperation({ summary: 'Get a work type by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'The work type has been successfully retrieved.',
+    type: WorkTypeResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Work type not found.',
+  })
+  @Get(':id')
+  async getWorkTypeById(@Param('id') id: string) {
+    const workType = await this.getWorkTypeByIdUseCase.execute(id);
+
+    return WorkTypePresentationMapper.toResponse(workType);
   }
 
   @ApiOperation({ summary: 'Create a work type' })
