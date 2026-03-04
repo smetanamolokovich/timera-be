@@ -13,9 +13,7 @@ export class GetWorkTypeByIdUseCase {
   async execute(id: string) {
     const workType = await this.workTypeRepository.findById(id);
 
-    if (!workType) {
-      throw new WorkTypeNotFoundError();
-    }
+    if (!workType) throw new WorkTypeNotFoundError();
 
     return workType;
   }
