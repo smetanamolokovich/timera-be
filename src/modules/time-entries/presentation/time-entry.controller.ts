@@ -1,10 +1,22 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateTimeEntryUseCase } from '../application/create-time-entry.usecase';
 import { GetTimeEntriesByProjectUseCase } from '../application/get-time-entries-by-project.usecase';
+import { UpdateTimeEntryUseCase } from '../application/update-time-entry.usecase';
+import { UpdateTimeEntryDto } from './dto/update-time-entry.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiExtraModels,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -36,6 +48,7 @@ export class TimeEntryController {
   constructor(
     private readonly createTimeEntryUseCase: CreateTimeEntryUseCase,
     private readonly getTimeEntriesByProjectUseCase: GetTimeEntriesByProjectUseCase,
+    private readonly updateTimeEntryUseCase: UpdateTimeEntryUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Log a new time entry' })
@@ -122,5 +135,36 @@ export class TimeEntryController {
         TimeEntryPresentationMapper.toResponse(timeEntry),
       ),
     };
+  }
+
+  @ApiOperation({ summary: 'Update an existing time entry' })
+  @ApiResponse({
+    status: 200,
+    description: 'The time entry has been successfully updated.',
+    type: TimeEntryResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request. Please check the input data.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Time entry not found.',
+  })
+  @Patch(':id')
+  async update(
+    @CurrentUser() user: JwtUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateTimeEntryDto,
+  ) {
+    const timeEntry = await this.updateTimeEntryUseCase.execute(user.id, id, {
+      workTypeId: dto.workTypeId,
+      description: dto.description,
+      hours: dto.hours,
+      date: dto.date ? new Date(dto.date) : undefined,
+    });
+
+    return TimeEntryPresentationMapper.toResponse(timeEntry);
   }
 }
