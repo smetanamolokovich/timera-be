@@ -5,6 +5,9 @@ import { InvalidEmailOrPasswordError } from '../domain/errors/invalid-email-or-p
 import type { PasswordHasher } from '../../users/domain/password-hasher';
 import { REPOSITORY_TOKENS, SERVICE_TOKENS } from '../../../common/tokens';
 import type { MembershipRepository } from '../../memberships/domain/interfaces/membership.repository.interface';
+import type { RefreshTokenRepository } from '../domain/refresh-token.repository.interface';
+import { randomBytes, randomUUID } from 'crypto';
+import { RefreshToken } from '../domain/refresh-token';
 
 export class LoginUserUseCase {
   constructor(
@@ -14,6 +17,8 @@ export class LoginUserUseCase {
     private passwordHasher: PasswordHasher,
     @Inject(REPOSITORY_TOKENS.MembershipRepository)
     private membershipRepository: MembershipRepository,
+    @Inject(REPOSITORY_TOKENS.RefreshTokenRepository)
+    private refreshTokenRepository: RefreshTokenRepository,
     private jwtService: JwtService,
   ) {}
 
@@ -43,8 +48,24 @@ export class LoginUserUseCase {
       role: activeMembership?.role ?? null,
     };
 
+    const refreshTokenValue = randomBytes(64).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    const refreshToken = new RefreshToken(
+      randomUUID(),
+      user.id,
+      refreshTokenValue,
+      expiresAt,
+      new Date(),
+      null,
+    );
+
+    await this.refreshTokenRepository.save(refreshToken);
+
     return {
       accessToken: this.jwtService.sign(payload),
+      refreshToken: refreshTokenValue,
     };
   }
 }

@@ -8,6 +8,7 @@ export const REPOSITORY_TOKENS = {
   OrganizationRepository: Symbol('OrganizationRepository'),
   MembershipRepository: Symbol('MembershipRepository'),
   InvitationRepository: Symbol('InvitationRepository'),
+  RefreshTokenRepository: Symbol('RefreshTokenRepository'),
 } as const;
 
 export const SERVICE_TOKENS = {
