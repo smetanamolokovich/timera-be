@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateTimeEntryUseCase } from '../application/create-time-entry.usecase';
 import { GetTimeEntriesByProjectUseCase } from '../application/get-time-entries-by-project.usecase';
 import { DeleteTimeEntryUseCase } from '../application/delete-time-entry.usecase';
@@ -6,6 +17,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiExtraModels,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
@@ -51,6 +63,9 @@ export class TimeEntryController {
   })
   @ApiBadRequestResponse({
     description: 'Bad Request. Please check the input data.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. You do not have access to this project.',
   })
   @Post()
   async create(@CurrentUser() user: JwtUser, @Body() dto: CreateTimeEntryDto) {
