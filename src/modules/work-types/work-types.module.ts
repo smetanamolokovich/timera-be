@@ -4,6 +4,7 @@ import { WorkTypeOrmEntity } from './infra/work-type.orm-entity';
 import { WorkTypeRepositoryImpl } from './infra/work-type.repository.impl';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
 import { GetWorkTypesUseCase } from './application/get-work-types.usecase';
+import { GetWorkTypeByIdUseCase } from './application/get-work-type-by-id.usecase';
 import { CreateWorkTypeUseCase } from './application/create-work-type.usecase';
 import { CreateWorkTypesBulkUseCase } from './application/create-work-types-bulk.usecase';
 import { WorkTypeController } from './presentation/work-type.controller';
@@ -14,6 +15,7 @@ import { ProjectModule } from '../projects/project.module';
   controllers: [WorkTypeController],
   providers: [
     GetWorkTypesUseCase,
+    GetWorkTypeByIdUseCase,
     CreateWorkTypeUseCase,
     CreateWorkTypesBulkUseCase,
     {
