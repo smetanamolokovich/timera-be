@@ -1,8 +1,10 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { LoginUserUseCase } from '../application/login-user.usecase';
 import { SwitchOrgUseCase } from '../application/switch-org.usecase';
+import { RefreshTokenUseCase } from '../application/refresh-token.usecase';
 import { LoginDto } from './dto/login.dto';
 import { SwitchOrgDto } from './dto/sign-org.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { AuthGuard } from '@nestjs/passport';
 import {
   CurrentUser,
@@ -23,6 +25,7 @@ export class AuthController {
   constructor(
     private loginUserUseCase: LoginUserUseCase,
     private switchOrgUseCase: SwitchOrgUseCase,
+    private refreshTokenUseCase: RefreshTokenUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Login user and get JWT token' })
@@ -40,6 +43,19 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto) {
     return this.loginUserUseCase.execute(dto.email, dto.password);
+  }
+
+  @ApiOperation({ summary: 'Refresh access token using a refresh token' })
+  @ApiResponse({
+    status: 200,
+    description: 'New access token and refresh token issued.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or expired refresh token.',
+  })
+  @Post('refresh')
+  async refresh(@Body() dto: RefreshTokenDto) {
+    return this.refreshTokenUseCase.execute(dto.refreshToken);
   }
 
   @ApiBearerAuth()

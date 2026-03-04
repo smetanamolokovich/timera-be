@@ -8,9 +8,15 @@ import { UsersModule } from '../users/users.module';
 import { AuthController } from './presentation/auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { MembershipModule } from '../memberships/membership.module';
+import { RefreshTokenOrmEntity } from './infra/refresh-token.orm-entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RefreshTokenRepositoryImpl } from './infra/refresh-token.repository.impl';
+import { REPOSITORY_TOKENS } from '../../common/tokens';
+import { RefreshTokenUseCase } from './application/refresh-token.usecase';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([RefreshTokenOrmEntity]),
     UsersModule,
     MembershipModule,
     PassportModule,
@@ -18,12 +24,21 @@ import { MembershipModule } from '../memberships/membership.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.getOrThrow<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: '15m' },
       }),
     }),
   ],
   controllers: [AuthController],
-  providers: [LoginUserUseCase, SwitchOrgUseCase, JwtStrategy],
+  providers: [
+    LoginUserUseCase,
+    SwitchOrgUseCase,
+    JwtStrategy,
+    RefreshTokenUseCase,
+    {
+      provide: REPOSITORY_TOKENS.RefreshTokenRepository,
+      useClass: RefreshTokenRepositoryImpl,
+    },
+  ],
   exports: [JwtModule],
 })
 export class AuthModule {}
