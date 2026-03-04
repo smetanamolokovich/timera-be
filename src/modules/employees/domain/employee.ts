@@ -6,6 +6,7 @@ export class Employee {
   constructor(
     public readonly id: string,
     public readonly organizationId: string,
+    public readonly userId: string | null,
     public readonly name: string,
     public readonly hourlyRate: number | null,
     public readonly createdAt: Date,
