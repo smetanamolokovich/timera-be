@@ -13,6 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshTokenRepositoryImpl } from './infra/refresh-token.repository.impl';
 import { REPOSITORY_TOKENS } from '../../common/tokens';
 import { RefreshTokenUseCase } from './application/refresh-token.usecase';
+import { LogoutUseCase } from './application/logout.usecase';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RefreshTokenUseCase } from './application/refresh-token.usecase';
     SwitchOrgUseCase,
     JwtStrategy,
     RefreshTokenUseCase,
+    LogoutUseCase,
     {
       provide: REPOSITORY_TOKENS.RefreshTokenRepository,
       useClass: RefreshTokenRepositoryImpl,

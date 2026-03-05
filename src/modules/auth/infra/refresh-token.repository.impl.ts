@@ -22,8 +22,8 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     return entity ? RefreshTokenMapper.toDomain(entity) : null;
   }
 
-  async revokeByToken(token: string): Promise<void> {
-    await this.repo.update({ token }, { revokedAt: new Date() });
+  async revokeByToken(token: string, revokedAt: Date): Promise<void> {
+    await this.repo.update({ token }, { revokedAt });
   }
 
   async revokeAllByUserId(userId: string): Promise<void> {
