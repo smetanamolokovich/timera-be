@@ -10,9 +10,13 @@ import { LoginUserUseCase } from '../application/login-user.usecase';
 import { SwitchOrgUseCase } from '../application/switch-org.usecase';
 import { RefreshTokenUseCase } from '../application/refresh-token.usecase';
 import { LogoutUseCase } from '../application/logout.usecase';
+import { ForgotPasswordUseCase } from '../application/forgot-password.usecase';
+import { ResetPasswordUseCase } from '../application/reset-password.usecase';
 import { LoginDto } from './dto/login.dto';
 import { SwitchOrgDto } from './dto/sign-org.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthGuard } from '@nestjs/passport';
 import {
   CurrentUser,
@@ -35,6 +39,8 @@ export class AuthController {
     private switchOrgUseCase: SwitchOrgUseCase,
     private refreshTokenUseCase: RefreshTokenUseCase,
     private logoutUseCase: LogoutUseCase,
+    private forgotPasswordUseCase: ForgotPasswordUseCase,
+    private resetPasswordUseCase: ResetPasswordUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Login user and get JWT token' })
@@ -113,5 +119,37 @@ export class AuthController {
   @Get('me')
   getProfile(@CurrentUser() user: JwtUser) {
     return user;
+  }
+
+  @ApiOperation({ summary: 'Request a password reset email' })
+  @ApiResponse({
+    status: 204,
+    description: 'Password reset email sent if account exists.',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected error occurred.',
+  })
+  @HttpCode(204)
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
+    return this.forgotPasswordUseCase.execute(dto.email);
+  }
+
+  @ApiOperation({ summary: 'Reset password using a reset token' })
+  @ApiResponse({
+    status: 204,
+    description: 'Password has been successfully reset.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid or expired password reset token.',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected error occurred.',
+  })
+  @HttpCode(204)
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto): Promise<void> {
+    return this.resetPasswordUseCase.execute(dto.token, dto.password);
   }
 }
