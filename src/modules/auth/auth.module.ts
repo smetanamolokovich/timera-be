@@ -14,13 +14,19 @@ import { RefreshTokenRepositoryImpl } from './infra/refresh-token.repository.imp
 import { REPOSITORY_TOKENS } from '../../common/tokens';
 import { RefreshTokenUseCase } from './application/refresh-token.usecase';
 import { LogoutUseCase } from './application/logout.usecase';
+import { ForgotPasswordUseCase } from './application/forgot-password.usecase';
+import { ResetPasswordUseCase } from './application/reset-password.usecase';
+import { PasswordResetTokenOrmEntity } from './infra/password-reset-token.orm-entity';
+import { PasswordResetTokenRepositoryImpl } from './infra/password-reset-token.repository.impl';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RefreshTokenOrmEntity]),
+    TypeOrmModule.forFeature([RefreshTokenOrmEntity, PasswordResetTokenOrmEntity]),
     UsersModule,
     MembershipModule,
     PassportModule,
+    EmailModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -36,9 +42,15 @@ import { LogoutUseCase } from './application/logout.usecase';
     JwtStrategy,
     RefreshTokenUseCase,
     LogoutUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase,
     {
       provide: REPOSITORY_TOKENS.RefreshTokenRepository,
       useClass: RefreshTokenRepositoryImpl,
+    },
+    {
+      provide: REPOSITORY_TOKENS.PasswordResetTokenRepository,
+      useClass: PasswordResetTokenRepositoryImpl,
     },
   ],
   exports: [JwtModule],

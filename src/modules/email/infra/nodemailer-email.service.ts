@@ -42,4 +42,19 @@ export class NodemailerEmailService implements EmailService {
       html,
     });
   }
+
+  async sendPasswordReset(to: string, resetUrl: string): Promise<void> {
+    const from = this.configService.getOrThrow<string>('MAIL_FROM');
+    const subject = 'Reset your Timera password';
+    const text = `You requested a password reset. Click the link below to set a new password:\n\n${resetUrl}\n\nThis link expires in 1 hour. If you did not request this, please ignore this email.`;
+    const html = `<p>You requested a password reset.</p><p>Click the link below to set a new password:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>This link expires in 1 hour. If you did not request this, please ignore this email.</p>`;
+
+    await this.getTransporter().sendMail({
+      from,
+      to,
+      subject,
+      text,
+      html,
+    });
+  }
 }
