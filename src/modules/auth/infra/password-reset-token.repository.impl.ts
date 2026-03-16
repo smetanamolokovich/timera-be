@@ -25,6 +25,7 @@ export class PasswordResetTokenRepositoryImpl
   }
 
   async update(token: PasswordResetToken): Promise<void> {
+    // TypeORM's save handles both insert and update by matching on the primary key
     await this.save(token);
   }
 }
