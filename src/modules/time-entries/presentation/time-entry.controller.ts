@@ -1,10 +1,24 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateTimeEntryUseCase } from '../application/create-time-entry.usecase';
 import { GetTimeEntriesByProjectUseCase } from '../application/get-time-entries-by-project.usecase';
+import { DeleteTimeEntryUseCase } from '../application/delete-time-entry.usecase';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiExtraModels,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -36,6 +50,7 @@ export class TimeEntryController {
   constructor(
     private readonly createTimeEntryUseCase: CreateTimeEntryUseCase,
     private readonly getTimeEntriesByProjectUseCase: GetTimeEntriesByProjectUseCase,
+    private readonly deleteTimeEntryUseCase: DeleteTimeEntryUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Log a new time entry' })
@@ -48,6 +63,9 @@ export class TimeEntryController {
   })
   @ApiBadRequestResponse({
     description: 'Bad Request. Please check the input data.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. You do not have access to this project.',
   })
   @Post()
   async create(@CurrentUser() user: JwtUser, @Body() dto: CreateTimeEntryDto) {
@@ -122,5 +140,23 @@ export class TimeEntryController {
         TimeEntryPresentationMapper.toResponse(timeEntry),
       ),
     };
+  }
+
+  @ApiOperation({ summary: 'Delete a time entry' })
+  @ApiResponse({
+    status: 204,
+    description: 'The time entry has been successfully deleted.',
+  })
+  @ApiNotFoundResponse({ description: 'Time entry not found.' })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Please provide a valid JWT token.',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  async delete(
+    @CurrentUser() user: JwtUser,
+    @Param('id') id: string,
+  ): Promise<void> {
+    await this.deleteTimeEntryUseCase.execute(user.id, id);
   }
 }

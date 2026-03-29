@@ -13,4 +13,5 @@ export interface TimeEntryRepository {
     toDate?: Date,
   ): Promise<PaginatedResponseDto<TimeEntry>>;
   findByWorkTypeId(workTypeId: string): Promise<TimeEntry[]>;
+  delete(id: string): Promise<void>;
 }
